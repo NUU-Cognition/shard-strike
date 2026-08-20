@@ -1,0 +1,17 @@
+shard-spec: "0.2.0"
+version: "0.1.0"
+name: Strike
+shorthand: strk
+description: Context and workflows for Strike, the local-first target-graph terminal app that launches Orbh sessions
+
+dependencies:
+  - source: NUU-Cognition/shard-flint
+  - source: NUU-Cognition/shard-orbh
+
+# The strike_start workflow delegates to the Projects shard's scope_task
+# workflow. Projects is not declared here because it is sourced from a local
+# Flint, and `dependencies.source` accepts owner/repo form only. Install
+# Projects alongside this shard.
+#
+# Strike owns no Mesh artifact type and no artifact folder. A Strike-launched
+# session produces (Task) artifacts, which the Projects shard owns.
