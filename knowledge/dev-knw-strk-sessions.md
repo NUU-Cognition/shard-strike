@@ -45,7 +45,7 @@ The whole layer sits behind the **Agent Sessions** setting. The setting defaults
 
 | Key | Action |
 |-----|--------|
-| `o b` | Bind a subsection objective row to a registered Flint |
+| `o b` | Bind a subsection objective row to a registered Flint. The bind also installs the Strike shard into that Flint when it holds none |
 | `o l` | Launch a session on the selected target |
 | `s` … `a` `o` | Launch Session Together: one session over every marked target. The set must agree on one bound Flint. (Task) 230 prevents automatic Linked Tasks groups in this version. |
 | `f`, or `o f` | Show the bound session. It focuses a live Obsidian tab or rewakes a sleeping session in a new focused tab. `f` is the plain tree key ((Task) 226); the fight menu moved to `F`. |
@@ -56,6 +56,36 @@ The whole layer sits behind the **Agent Sessions** setting. The setting defaults
 | `o x` | Unlink the bound session |
 
 The `o` menu also carries adopt (`a`), switch (`s`), copy id (`y`), close (`c`), and launch in Flint (`F`).
+
+### The Bind Installs The Shard
+
+A bound Flint runs every agent session for that subsection, and four of the
+five launch modes tell that session to run `flint shard start strk`. A Flint
+with no Strike shard therefore breaks the session's first command. `o b`
+repairs that at the moment the tie is made ((Task) 257). Source of truth:
+`src/orbh/flint-shard.ts`.
+
+- **The check** is one filesystem read of `<flintPath>/Shards/Strike/init-strk.md` —
+  the file `flint shard start strk` reads, so its presence IS the shard. A dev
+  copy alone reads as absent, and installing from that dev copy is the repair.
+  An unreadable Flint root reads as `unknown`, never as absent, by the same
+  rule the registry readers follow.
+- **The install** is `flint shard install strike --with-deps -p <flintPath>`,
+  spawned non-blocking with process exit as the event, exactly as `openFlint`
+  runs `flint open`. The source stays the bare name, so the CLI resolves it: a
+  dev copy inside that Flint installs offline, and a Flint with no copy
+  expands to `NUU-Cognition/shard-strike`. `--with-deps` carries the three
+  declared dependencies, of which `NUU-Cognition/shard-projects` is the one
+  that matters here — `wkfl-strk-strike_start` delegates to
+  `wkfl-proj-scope_task`.
+- **The order.** The sidecar write and the `Bound "<row>" → <Flint>` flash come
+  first. The binding is a local fact, and the shard check is a repair that
+  follows it; no failure of the check can fail a bind. The operator then sees
+  `Installing the Strike shard into <Flint>…` and the outcome. A `present` or
+  `unknown` answer says nothing more.
+- **One install per Flint directory.** The guard is keyed by the resolved
+  path, so binding several subsections to one Flint in a row never runs two
+  CLI calls over the same directory.
 
 ### A live session with no tab
 
