@@ -14,6 +14,8 @@ orbh-sessions:
   - "[[17071312-cf12-402b-9f74-64304657a95d]]"
   - "[[f2c7a286-a3e8-4f0a-a65a-a1e81adb823d]]"
   - "[[47411044-3fbf-4dcc-b869-9641652bcce7]]"
+  - "[[3976181c-02d1-44ac-84a1-05a703de6355]]"
+  - "[[4a3ef60d-34cb-4830-87ac-14e6ea180c45]]"
 ---
 
 # Knowledge: Strike
@@ -291,9 +293,13 @@ version can restore the blocks that have a `(Task) 230` comment.
 | View | Panes | Keys |
 |------|-------|------|
 | Projects | left: the searchable project list (`Master Backlog` rows on top, one per org); right top: the selected project's deliverables (derived status, sections and task progress, closer due); right bottom: its Backlog and Queue preview | `tab`/`h`/`l` move focus across panes · `j`/`k` in a pane · `enter` on a project focuses the deliverables pane, on a deliverable opens the Deliverable view · projects pane: `/` filter · `c` new · `r` rename · `e` description · `u` next update · `s` status cycle · `d` delete — deliverables pane: `c` new · `r` · `f` Flint tie · `D` due date · `d` — backlog pane: `c` quick add · `C` to Queue · `r` · `space` · `!` priority · `P` promote from Queue · `m` place into a subsection · `o` do date · `R` rarity · `a` assignee · `K`/`J` reorder · `t` group by · `d` · `p` pull into the graph |
-| Deliverable | header `Project / Deliverable · status · sections d/t · tasks d/t`; left (wide): Sections — subsections in order, closer last, tasks under each; right: the project's Backlog and Queue | sections pane, subsection row: `enter`/`z` fold · `Z` fold all · `H` hide done · `n` new subsection before · `c`/`C` new task · `r` · `D` · `K`/`J` · `L` dependencies · `!` priority colour · `d` · `y` pull as a unit · `Y` pull and root — task row: `r` · `space` (blocked rows say why) · `K`/`J` · `m` move · `b` send to backlog · `M` promote · `o` · `R` · `a` · `d` · `p` pull · `enter` on a tied row focuses its target — backlog pane: as above |
+| Deliverable | header `Project / Deliverable · status · sections d/t · tasks d/t`; left (wide): Sections — subsections in order, closer last, tasks under each; right: the project's Backlog and Queue | sections pane, subsection row: `enter`/`z` fold · `Z` fold all · `H` hide done · `n` new subsection before · `c`/`C` new task · `r` · `D` · `K`/`J` · `L` dependencies · `!` priority colour · `M` convert to task · `d` · `y` pull as a unit · `Y` pull and root — task row: `r` · `space` (blocked rows say why) · `K`/`J` · `m` move · `b` send to backlog · `M` promote · `o` · `R` · `a` · `d` · `p` pull · `enter` on a tied row focuses its target — backlog pane: as above |
 
 `esc` closes a filter, then returns from the Deliverable view to Projects with the deliverable selected, then closes the page; `q` closes the page. Derived statuses (subsection: done, blocked, in-progress, ready; deliverable: completed, blocked, in-progress, open) come from `src/ops/dag-status.ts`, a port of the web rules. Server refusals (`closer_locked`, `subsection_blocked`, `dependency_order_invalid`, …) flash with the server's message.
+
+`M` on a subsection row converts the subsection to a task. The destination picker offers the project backlog and peer subsections. The action consumes the subsection. It keeps the title and the creation time.
+
+The conversion accepts only an empty, plain subsection. The subsection must have no outgoing dependency. Only its closer can depend on it. The action removes that structural closer edge. The subsection must have no due date, deployment, priority colour, or completion data. Strike must not hold or replicate the subsection. The closer cannot become a task. This action exists only on the Operations page. It does not convert a held graph subsection.
 
 In the graph, the `W` menu offers `W t` (Move to Scope…) and `W b` (the same move into the current project's backlog, with no picker). Both are LOCAL subtree moves since (Task) 225, not canon-only placements, and since (Task) 239 both PULL a destination the store does not hold yet; see "Moving a Subtree Between Scopes".
 
@@ -323,9 +329,9 @@ Every local-only variation of a target falls in one of five families. None is pu
 | Modifiers | `full`, `sideStrike` | How does this row read to its parent — the counter, the parent's readiness | Compose | `sideStrike` trails the state glyph; `full` is spelled by the counter alone |
 | Overlays | `overlay`: `linked`, `ordered` | Which rows on one sibling row form a group, and with what group behaviour | One per row | A bracket right of the state glyph |
 | Successor marks | `followUpOf`, `progressionOf` | Where did this row come from at a finish | One per row | Trail the state glyph — `followUpOf` marks the anchor, `progressionOf` the successor |
-| Labels | `skillCheck`; `label`: `minion`, `henchman` | What meaning did the operator stamp on the row | `skillCheck` composes with everything; one class label per row | `skillCheck` trails the state glyph; a class label wears its own icon in the state slot |
+| Labels | `skillCheck`, `verifyFailed`; `label`: `minion`, `henchman` | What meaning did the operator stamp on the row | `skillCheck` composes with everything; `verifyFailed` rides a `skillCheck` row; one class label per row | `skillCheck` trails the state glyph, and `verifyFailed` replaces that mark; a class label wears its own icon in the state slot |
 
-Two label families sit under one word. A **pure label** (`skillCheck`) is a boolean and a trailing glyph. It changes no readiness, no status, no counter. A **class label** (`minion`, `henchman`) implies combo: the label rides the combo switch, refuses to outlive it, and replaces the combo mark with its own icon. Class labels are labels over combo semantics, not pure marks.
+Two label families sit under one word. A **pure label** (`skillCheck`, `verifyFailed`) is a boolean and a trailing glyph. It changes no readiness, no status, no counter. A **class label** (`minion`, `henchman`) implies combo: the label rides the combo switch, refuses to outlive it, and replaces the combo mark with its own icon. Class labels are labels over combo semantics, not pure marks.
 
 A new variation joins the family that answers its question. A meaning is a label. A behaviour is a kind or a modifier. A relation between rows is an overlay or a successor mark.
 
@@ -380,10 +386,17 @@ Both marks are born at a finish through the finish menu or the actions menu, and
 
 A skill check is a verification row: a check on work that was finished before it, or on work the operator names in its title. It is a pure label — the glyph U+F029A (nf-md-gauge) trails the state glyph in both vocabulary modes, and the row starts, finishes, blocks, and counts like any row.
 
+**A check has two outcomes.** A check that passed is closed the plain way, and it keeps the gauge. A check that failed is closed through its own finish-menu step ((Task) 272). That step is the only writer of `verifyFailed`, and it does three things to the check before it asks anything: it appends ` (failed)` to the title, it stamps the label, and it finishes the row. The failed row then wears U+F015A (nf-md-close-octagon) **instead of** the gauge — one mark, because the octagon already says the row is a check.
+
+The step then opens a title prompt with **nothing prefilled**, for the rework the failure implies. Enter splices that row into the check's place, marked `followUpOf`, and the check wears the follow up mark. Blank or Esc creates nothing, and the check stays closed, renamed, and marked; the outcome never waits on what the operator types next.
+
+A reopen spends the outcome. `space` on a failed done check resets it to `todo`, and `shift-space` reverts it to `doing`; both clear `verifyFailed` and strip the ` (failed)` suffix in one undo entry with the status write. An open row carries no verdict. Clearing `skillCheck` clears `verifyFailed` with it, in the store: a row that is not a check failed no verification.
+
 | Surface | Gesture | Result |
 |---------|---------|--------|
-| The finish menu | `space` on a doing row, then the `Create a skill check…` step | The title prompt prefills the one word `Verify `. Enter finishes the anchor and splices the check into its place, wearing `skillCheck` and **not** `followUpOf`; the anchor wears no follow up mark. Blank or Esc creates nothing, and the run still finishes the anchor. The step is a finish owner: it excludes the follow up and progression steps. A second `space` on the menu is the plain finish; `ctrl-space` is the plain finish outside the menu. |
-| The actions menu | `a k` | Sets or clears the label on the selected row. One undo entry. |
+| The finish menu | `space` on a doing row, then the `Create a skill check…` step | The title prompt prefills the one word `Verify `. Enter finishes the anchor and splices the check into its place, wearing `skillCheck` and **not** `followUpOf`; the anchor wears no follow up mark. Blank or Esc creates nothing, and the run still finishes the anchor. The step is a finish owner: it excludes the follow up and progression steps. A second `space` on the menu runs the ticked steps ((Task) 264); with nothing ticked it is the plain finish. `ctrl-space` is the plain finish inside the menu and outside it. |
+| The finish menu | `space` on a doing skill check, then the `Verify failed…` step | The step shows on a skill check and on no other row. It renames, marks, and finishes the check, then asks for the rework row with an empty prompt. It is a finish owner: it excludes the follow up, skill check, and progression steps. See the two-outcome rule above. |
+| The actions menu | `a k` | Sets or clears the label on the selected row. One undo entry. Clearing the check clears a failed outcome with it. |
 | The create menu | `c` … `k`, then a placement | A new row born with the label. `a` (Above Cursor) is the common case: the prompt prefills `Verify ` and the check splices above the cursor row (requires it, takes over its unlocks). `d` (Below Cursor) is the reverse splice. |
 | The skill check tray | `S` | A bottom panel — the doing peek's panel over a different list — of every skill check the active tab's view can see, ordered doing, open, blocked, done. A row wears the gauge in its session gutter when unbound, and a leading `Verify ` is hidden from its title. `j`/`k` select, `enter` goes to the row, `space` starts a todo check or opens the finish menu on a doing one, `ctrl-space` finishes, `shift-space` resets, `o` agent menu, `f` focus, `a` actions, `F` fullscreen, `esc`/`q`/`S` closes, `D` switches to the doing peek (and `S` inside the doing peek switches to the tray). |
 

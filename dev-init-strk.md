@@ -69,6 +69,8 @@ The **Discuss First** mode names [[dev-wkfl-strk-discuss_start]]. That workflow 
 
 Read [[dev-knw-strk-sessions]] for the binding model, the launch chain, and the exact preamble contract.
 
+**Headless launches ((Task) 281).** `alt-h` in the launch prompt stage makes the launch headless: no Obsidian window, and the session's whole operator channel is the return-result chat (`o t` on the bound row). A headless launch offers three modes only — Strike Start, Discuss First, Create and Do Task — and points the session at `flint shard hstart strk` and the `hwkfl-strk-*` workflows. A headless session ends every turn with `return --await` or `return --finish`; the returned result is the message the operator reads.
+
 ## The Lifecycle Label
 
 A bound Strike row shows a session status glyph. When the session waits, that glyph says only that it waits. The **lifecycle label** says why. It is one Orbh interface key that this session writes and that the Strike TUI renders as a second glyph beside the status glyph.
@@ -83,7 +85,7 @@ flint orbh session set strike-lifecycle <value>
 | `pre-scope` | text to speech | The session discusses the target before any task exists ([[dev-wkfl-strk-discuss_start]]) |
 | `discussing` | message | The session is in a conversation with the operator: a proposal review, a notepad, a design talk |
 | `review` | notebook | The work is finished and waits for the operator to review it |
-| `input` | confused robot | The session is blocked, needs a decision, or is in any other state |
+| `input` | other mark | The session is blocked, needs a decision, or is in any other state |
 
 **Set the label when you finish a piece of work and are about to wait for the operator. Never set it during the work.** The TUI hides the label while the session works and shows the last value in every rest state, including a closed session. So the label you set as your last action before you wait is the one the operator sees. Do not clear it on close.
 
@@ -97,7 +99,7 @@ The mirror table below maps the state you leave the work in to the label. It hol
 | The task is `review`, `reviewing`, or `reviewed` | `review` |
 | The task is `blocked`, you asked a question the operator must answer, or nothing above fits | `input` |
 
-`pre-scope` and `discussing` are two states, not one. `pre-scope` means no task exists yet. `discussing` means a task exists and its proposal is under discussion. An unknown value renders as the confused robot. The empty string removes the label; you rarely need it. See [[dev-knw-strk-sessions]] for the contract the TUI reads.
+`pre-scope` and `discussing` are two states, not one. `pre-scope` means no task exists yet. `discussing` means a task exists and its proposal is under discussion. An unknown value renders as the `other` mark. The empty string removes the label; you rarely need it. See [[dev-knw-strk-sessions]] for the contract the TUI reads.
 
 ## Closing a Strike Session
 

@@ -210,6 +210,8 @@ Every mode except None loads the Strike shard first, so the session can read thi
 
 **The plural form.** Discuss First takes a plural sentence for a together-launch: ``…then follow the wkfl-strk-discuss_start workflow for these tasks before other work.`` Strike Start is still the one task-facing mode with no plural, because it names a workflow and nothing else.
 
+**Headless launch ((Task) 281).** `alt-h` in the prompt stage toggles a headless launch. A headless launch offers exactly three modes — Strike Start, Discuss First, Create and Do Task — and each instruction swaps to its headless form: `flint shard hstart strk`, then `hwkfl-strk-strike_start`, `hwkfl-strk-discuss_start`, or `hwkfl-strk-create_and_do`. A notepad is a conversation surface and `none` leaves no return contract, so neither exists headless. The launch shells out to `flint orbh launch <profile> <prompt>` in the bound Flint's root — no Obsidian window anywhere on the path — and Strike parses the session id from the CLI's `ID:` line.
+
 ### 3. The operator's extra text
 
 Whatever was typed in the prompt stage. Newlines collapse to spaces. It comes last, so it is the operator's final word and may override the instruction above it.
@@ -247,9 +249,9 @@ The one channel a session has back to a Strike row is the Orbh session interface
 | `pre-scope` | nf-md-text_to_speech | `U+F050A` |
 | `discussing` | nf-md-message_processing | `U+F0366` |
 | `review` | nf-md-notebook | `U+F082E` |
-| `input`, or any other non-empty value | nf-md-robot_confused | `U+F169F` |
+| `input`, or any other non-empty value | the operator-chosen `other` mark | `U+F1738` |
 
-**`pre-scope` and `discussing` are two states.** `pre-scope` (󰔊) means no task exists yet and the session is still deciding what the task should be. Only [[dev-wkfl-strk-discuss_start]] writes it. `discussing` means a task exists and its proposal is under discussion. The wire value carries the dash; the TUI glyph key is `preScope`, because the key set is a TypeScript identifier list. A value written as `prescope` or `pre_scope` falls through to the confused robot.
+**`pre-scope` and `discussing` are two states.** `pre-scope` (󰔊) means no task exists yet and the session is still deciding what the task should be. Only [[dev-wkfl-strk-discuss_start]] writes it. `discussing` means a task exists and its proposal is under discussion. The wire value carries the dash; the TUI glyph key is `preScope`, because the key set is a TypeScript identifier list. A value written as `prescope` or `pre_scope` falls through to the `other` mark.
 
 **Transport.** The value rides the same feed as the status glyph. Over SSE it is `session.interface["strike-lifecycle"]` on the `snapshot` and `session.changed` payloads; a write produces `changedFacts: ["interface", ...]`, which the feed treats as relevant. Over the filesystem fallback it is `ext.orbh.slices["core:interface"]["strike-lifecycle"]` in the spool snapshot. Strike keeps the raw string on the session status entry and maps it at render time.
 
@@ -291,6 +293,20 @@ A held subsection replicates to every org peer that holds it ((Task) 224), so a 
 - **Last writer wins**, per row, by server-stamped `rev`. A peer's newer edit replaces the local row; a local edit whose push is still owed keeps the local version. So a session that has held a row's title in its prompt for a while may be looking at a stale title.
 - **Tombstones.** A peer's delete arrives as a tombstone and deletes the local row, sweeping edges and repairing overlays. A session bound to a row a peer deleted loses its target; the lifecycle label then reads as a dangling binding, and the binding is cleaned up on the next sweep.
 - **The sink.** Replication is best-effort behind the local commit, and every failure reaches the sync failure sink under phase `replica`. A refused read leaves the unit local; it never empties.
+
+## Headless Sessions and the Return-Result Chat
+
+A headless session has no pane and no Obsidian binding ((Task) 281). Its conversation with the operator is the **return-result chat**: Strike derives it from the session's spool and renders it as a modal chat surface.
+
+**What the chat shows, in time order:**
+
+- The launch prompt (`ext.orbh.prompt`), as the operator's first message
+- Every returned result (`ext.orbh.runs[].result`), as the session's replies
+- Every inbox message (`ext.orbh.slices["core:inbox"]`): `from: "human"` renders as the operator, a `Strike: ` prefixed text renders as a system line, and a session-id sender renders as a peer line
+
+**The gestures.** `o t` opens the chat on any bound row. On a headless session, `f`, `o f`, `o w`, and `o W` open the chat too — there is no tab to focus or reopen. Enter in the chat composer sends the text with `flint orbh message send <id> <text> --revive`, spawned in the bound Flint's root. The message is durable in the spool, an awaiting session wakes on it through the machine orchestrator, an ended one revives, and a working one reads it at its next turn boundary. The next returned result appends to the chat through the same status feed events every glyph rides.
+
+**What a headless session must do:** end every turn with `return --await` (or `--finish`), write results as chat replies, set the lifecycle label before every await, and never block on `session ask`. The contract is in `hinit-strk.md` and the three `hwkfl-strk-*` workflows.
 
 ## Failure Modes
 
