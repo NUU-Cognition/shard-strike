@@ -7,6 +7,7 @@ orbh-sessions:
   - "[[00c93799-6730-4346-b597-22b2550b2cc1]]"
   - "[[e1ce37aa-53fe-47f2-85c2-5a664ade7ae7]]"
   - "[[8f4b956a-490e-4b34-a91b-0e3faf67ec5d]]"
+  - "[[c4be5d77-f1b2-4e74-bea0-a4d34dc2f60a]]"
 ---
 
 # Knowledge: Strike Sessions
@@ -54,6 +55,7 @@ The whole layer sits behind the **Agent Sessions** setting. The setting defaults
 | `o r` | Resume an errored or finished session on its own profile |
 | `o i` | Link an existing session by pasted id |
 | `o x` | Unlink the bound session |
+| `I` | Open the Sessions Tray: the bottom panel grouped by session first ((Task) 303) |
 
 The `o` menu also carries adopt (`a`), switch (`s`), copy id (`y`), close (`c`), and launch in Flint (`F`).
 
@@ -92,6 +94,38 @@ repairs that at the moment the tie is made ((Task) 257). Source of truth:
 An interactive session is a detachable daemon; the Obsidian tab holds only an attach client. When Obsidian closes, the tab dies and the agent keeps running. The session stays live (working or attention) and its Obsidian binding — `metadata.obsidian` on the session, keyed by the pane's pty pid — goes stale. `o f` then fails with "tab is gone" and points at `o w`. `o w` posts the resume route; the new pane types `flint orbh i <target> -c <id>`, which attaches the live manager and re-persists the binding, so `o f` and `flint orbh focus` work again. No second session is created.
 
 A bound row carries a live three-state glyph: attention, working, error.
+
+### The Sessions Tray
+
+`I` opens the **Sessions Tray** ((Task) 303). It is the third mode of the
+bottom panel that the doing peek (`D`) and the skill check tray (`S`) share.
+The doing peek groups doing targets by tab. The Sessions Tray groups rows by
+session first: each session is one header, and its rows sit under it. Source
+of truth: `buildSessionTrayRows` in `src/tui/tree-model.ts`; the renderer is
+the doing peek's (`src/tui/views/doing-peek.ts`, `sessionTray`).
+
+- **Which sessions.** A session shows when at least one live row wears it as
+  its SELECTED session in the bindings sidecar. Every session gesture on a row
+  targets the selected session, so a row under a header always acts on that
+  header's session. A session that is only a non-selected link has no row to
+  act through, and the tray leaves it out. A `done` session is left out: the
+  sidecar keeps the bindings of closed sessions. The list is store-wide.
+- **Order.** Sessions sort waiting, working, error, sleeping, then by title.
+  Rows inside a session sort doing, open todo, blocked todo, done.
+- **The header** reads `[elapsed] <session mark> [lifecycle] Title · runtime/profile · Flint`.
+  A member row leads with its own state glyph, because the header already
+  carries the session mark — the Add To Session picker (`o g`) paints its rows
+  the same way.
+- **Keys.** `j`/`k` select rows and headers, `h`/`l` fold a session (for this
+  run only), `Z` folds every session, `H`/`L` jump session to session.
+  `enter` on a header and `f` focus the session; `enter` on a row goes to the
+  task. `o` opens the agent menu. `space`, `ctrl-space`, `shift-space`, `a`,
+  `e`, `u`, `ctrl-r`, `+`/`-`, and `F` act as in the doing peek. `I`, `esc`,
+  or `q` closes; `D` and `S` switch the mode. A header acts through its first
+  member for `f`, `o`, and `enter` only; a status gesture on a header does
+  nothing.
+- **Off setting.** With Agent Sessions off, `I` flashes the setting and opens
+  nothing.
 
 ## The Launch Modal
 
