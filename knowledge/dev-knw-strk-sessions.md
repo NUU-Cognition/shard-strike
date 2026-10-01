@@ -99,10 +99,21 @@ A bound row carries a live three-state glyph: attention, working, error.
 
 `I` opens the **Sessions Tray** ((Task) 303). It is the third mode of the
 bottom panel that the doing peek (`D`) and the skill check tray (`S`) share.
-The doing peek groups doing targets by tab. The Sessions Tray groups rows by
-session first: each session is one header, and its rows sit under it. Source
-of truth: `buildSessionTrayRows` in `src/tui/tree-model.ts`; the renderer is
-the doing peek's (`src/tui/views/doing-peek.ts`, `sessionTray`).
+It keeps the doing peek's division — one headed block per open scoped tab,
+named as the tab bar names it — and inside each block every session is a
+header with its rows under it. Sessions and rows wear the tree view's guides
+(`├─`, `└─`, `│`). Source of truth: `buildSessionTrayRows` in
+`src/tui/tree-model.ts`; the renderer is the doing peek's
+(`src/tui/views/doing-peek.ts`, `sessionTray`).
+
+```
+1: Strike
+├─ <mark> Tray work · claude/opus · NUU Operations
+│  ├─ <state> Write tray
+│  └─ <state> Plan tray
+└─ <mark> Sync · claude/opus · NUU Operations
+   └─ <state> Fix sync
+```
 
 - **Which sessions.** A session shows when at least one live row wears it as
   its SELECTED session in the bindings sidecar. Every session gesture on a row
@@ -110,16 +121,22 @@ the doing peek's (`src/tui/views/doing-peek.ts`, `sessionTray`).
   header's session. A session that is only a non-selected link has no row to
   act through, and the tray leaves it out. A `done` session is left out: the
   sidecar keeps the bindings of closed sessions. The list is store-wide.
+- **Which block.** A session sits in a tab's block when one of its rows does,
+  by the doing peek's rule (`doingGroupKeysFor`). A session with rows under two
+  tabs heads one block in each, with that block's rows. A row that no open tab
+  claims renders nowhere, as in the doing peek. With no tab open the tray is
+  flat: the sessions are the top level.
 - **Order.** Sessions sort waiting, working, error, sleeping, then by title.
   Rows inside a session sort doing, open todo, blocked todo, done.
-- **The header** reads `[elapsed] <session mark> [lifecycle] Title · runtime/profile · Flint`.
+- **The session header** reads `<guide> [elapsed] <session mark> [lifecycle] Title · runtime/profile · Flint`.
   A member row leads with its own state glyph, because the header already
   carries the session mark — the Add To Session picker (`o g`) paints its rows
   the same way.
-- **Keys.** `j`/`k` select rows and headers, `h`/`l` fold a session (for this
-  run only), `Z` folds every session, `H`/`L` jump session to session.
-  `enter` on a header and `f` focus the session; `enter` on a row goes to the
-  task. `o` opens the agent menu. `space`, `ctrl-space`, `shift-space`, `a`,
+- **Keys.** `j`/`k` select rows and headers, `h`/`l` fold a tab block or a
+  session (for this run only, apart from the doing peek's folds), `Z` folds
+  every session, `H`/`L` jump header to header. `enter` on a tab header goes
+  to the tab. `enter` on a session header and `f` focus the session; `enter`
+  on a row goes to the task. `o` opens the agent menu. `space`, `ctrl-space`, `shift-space`, `a`,
   `e`, `u`, `ctrl-r`, `+`/`-`, and `F` act as in the doing peek. `I`, `esc`,
   or `q` closes; `D` and `S` switch the mode. A header acts through its first
   member for `f`, `o`, and `enter` only; a status gesture on a header does
