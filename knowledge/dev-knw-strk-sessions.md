@@ -101,18 +101,19 @@ A bound row carries a live three-state glyph: attention, working, error.
 bottom panel that the doing peek (`D`) and the skill check tray (`S`) share.
 It keeps the doing peek's division — one headed block per open scoped tab,
 named as the tab bar names it — and inside each block every session is a
-header with its rows under it. Sessions and rows wear the tree view's guides
-(`├─`, `└─`, `│`). Source of truth: `buildSessionTrayRows` in
+header with its rows under it. A session header steps in under its tab by the
+doing peek's plain indent. Only the rows wear the tree view's guides (`├─`,
+`└─`) under their session. Source of truth: `buildSessionTrayRows` in
 `src/tui/tree-model.ts`; the renderer is the doing peek's
 (`src/tui/views/doing-peek.ts`, `sessionTray`).
 
 ```
 1: Strike
-├─ <mark> Tray work · claude/opus · NUU Operations
-│  ├─ <state> Write tray
-│  └─ <state> Plan tray
-└─ <mark> Sync · claude/opus · NUU Operations
-   └─ <state> Fix sync
+  <mark> Tray work · claude/opus · NUU Operations
+  ├─ <state> Write tray
+  └─ <state> Plan tray
+  <mark> Sync · claude/opus · NUU Operations
+  └─ <state> Fix sync
 ```
 
 - **Which sessions.** A session shows when at least one live row wears it as
@@ -128,7 +129,7 @@ header with its rows under it. Sessions and rows wear the tree view's guides
   flat: the sessions are the top level.
 - **Order.** Sessions sort waiting, working, error, sleeping, then by title.
   Rows inside a session sort doing, open todo, blocked todo, done.
-- **The session header** reads `<guide> [elapsed] <session mark> [lifecycle] Title · runtime/profile · Flint`.
+- **The session header** reads `[elapsed] <session mark> [lifecycle] Title · runtime/profile · Flint`.
   A member row leads with its own state glyph, because the header already
   carries the session mark — the Add To Session picker (`o g`) paints its rows
   the same way.
@@ -141,6 +142,15 @@ header with its rows under it. Sessions and rows wear the tree view's guides
   or `q` closes; `D` and `S` switch the mode. A header acts through its first
   member for `f`, `o`, and `enter` only; a status gesture on a header does
   nothing.
+- **Search.** `/` opens the doing peek's search over the tray: the same
+  modal, the same status line, and the same keys. A session whose title holds
+  the query keeps all its rows; any other session keeps only the rows whose
+  title holds it. The tree is built again over the matches, so the tab and
+  session headers stand as context and the guides stay true. The cursor
+  (`tab`/`shift-tab`, `↑`/`↓`) stops on the matches only, `enter` puts the
+  panel's cursor on the match, and `esc` cancels. The search reads the folds:
+  a row under a folded header is out of the search. Source:
+  `sessionTraySearchMatches` in `src/tui/tree-model.ts`.
 - **Off setting.** With Agent Sessions off, `I` flashes the setting and opens
   nothing.
 
