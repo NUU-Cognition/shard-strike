@@ -10,6 +10,7 @@ orbh-sessions:
   - "[[c4be5d77-f1b2-4e74-bea0-a4d34dc2f60a]]"
   - "[[99bfea21-ee80-481c-ba58-e29cd81aaf3d]]"
   - "[[3fb6e594-a179-4c0b-ba67-833b2ccaea67]]"
+  - "[[01286b97-7ae5-4fb6-ab72-1efcbca3c525]]"
 ---
 
 # Knowledge: Strike Sessions
@@ -56,7 +57,8 @@ The whole layer sits behind the **Agent Sessions** setting. The setting defaults
 | `o w` / `o W` | Reopen the bound session in a new Obsidian tab, focused / in the background. A sleeping session relaunches on the same id; a live session whose tab is gone reattaches and re-binds |
 | `o r` | Resume an errored or finished session on its own profile |
 | `o i` | Link an existing session by pasted id |
-| `o x` | Unlink the bound session |
+| `o x` | Unlink the bound session. On a row whose session is bound on another computer, the entry is **Detach Remote Agent Session**: after a confirm, every peer stops showing that session at once, and the source computer unlinks its binding when it next runs Strike ((Task) 277, (Task) 312) |
+| `o X` | Release the doing claim of another computer, after a confirm (`y`). The entry shows only on a row that another computer holds. Both sync paths have it ((Task) 300, (Task) 312) |
 | `I` | Open the Sessions Tray: the bottom panel grouped by session first ((Task) 303) |
 
 The `o` menu also carries adopt (`a`), switch (`s`), copy id (`y`), close (`c`), and launch in Flint (`F`).
@@ -396,7 +398,9 @@ The operator's command outranks every built-in backend on purpose. The exact cal
 A held subsection replicates to every org peer that holds it ((Task) 224), so a target a session works on can change under it. What that means for a session:
 
 - **What travels** is the local truth of every row in the unit — title, body, status, `requires`, memberships, dates, priority, rarity, kind, modifiers, overlay, marks, labels, `tieBreak`, archive and completion moments, the mount identity, and `pushBinding`. Derived fields (`readiness`, `tiePending`, `ownerUserId`, `mountMissing`) never travel; each client re-derives them.
-- **The bindings sidecar does NOT travel.** `strike-orbh.json` is machine-local, so a session bound on one machine is invisible on a peer. A peer sees the row, not the session on it.
+- **The bindings sidecar does NOT travel.** `strike-orbh.json` is machine-local. A peer sees the row and a display-only remote session state ((Task) 216): the state glyph, the lifecycle label, and the machine name. The state gives the peer no control of the session.
+- **Remote detach ((Task) 277, (Task) 312).** A peer can detach the remote session from a row with `o x`. The request goes to the session state row of the source computer on the server. Every peer stops showing a state that has a pending request, so the detach takes effect at once, also when the source computer is off. The source reads the request when it next runs Strike, unlinks its binding when the binding token still matches, and acknowledges. A source that reports a new binding token reports a new fact, and peers show it again. The server keeps a state for seven days after its last write, and the request counts as a write. When the source returns after more than seven days, it reports its binding again and the remote session comes back on peers.
+- **Foreign doing claims ((Task) 243, (Task) 312).** A claim of another computer locks start, finish, and launch on the row. `o X` releases it from any computer. On the replica path the server mutation `strikeReplicas:forceReleaseDoingClaim` deletes that one claim; the other computer keeps its own `doing` and claims the row again only from a new start gesture. On the command path the command is `ForceReleaseDoing`.
 - **The `sub:` rule.** A unit's objective row travels under the derived identity `sub:<subsectionId>`, never a minted UUID, and an arriving `sub:` row maps onto the local anchor for that subsection. A launch on an objective is therefore a launch on this machine's anchor row.
 - **Last writer wins**, per row, by server-stamped `rev`. A peer's newer edit replaces the local row; a local edit whose push is still owed keeps the local version. So a session that has held a row's title in its prompt for a while may be looking at a stale title.
 - **Tombstones.** A peer's delete arrives as a tombstone and deletes the local row, sweeping edges and repairing overlays. A session bound to a row a peer deleted loses its target; the lifecycle label then reads as a dangling binding, and the binding is cleaned up on the next sweep.
