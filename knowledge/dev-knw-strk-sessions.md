@@ -8,6 +8,7 @@ orbh-sessions:
   - "[[e1ce37aa-53fe-47f2-85c2-5a664ade7ae7]]"
   - "[[8f4b956a-490e-4b34-a91b-0e3faf67ec5d]]"
   - "[[c4be5d77-f1b2-4e74-bea0-a4d34dc2f60a]]"
+  - "[[99bfea21-ee80-481c-ba58-e29cd81aaf3d]]"
 ---
 
 # Knowledge: Strike Sessions
@@ -138,7 +139,8 @@ doing peek's plain indent. Only the rows wear the tree view's guides (`├─`,
   every session, `H`/`L` jump header to header. `enter` on a tab header goes
   to the tab. `enter` on a session header and `f` focus the session; `enter`
   on a row goes to the task. `o` opens the agent menu. `space`, `ctrl-space`, `shift-space`, `a`,
-  `e`, `u`, `ctrl-r`, `+`/`-`, and `F` act as in the doing peek. `I`, `esc`,
+  `e`, `u`, `ctrl-r`, `+`/`-`, and `F` act as in the doing peek. `g` starts the
+  number jump (below). `I`, `esc`,
   or `q` closes; `D` and `S` switch the mode. A header acts through its first
   member for `f`, `o`, and `enter` only; a status gesture on a header does
   nothing.
@@ -151,6 +153,23 @@ doing peek's plain indent. Only the rows wear the tree view's guides (`├─`,
   panel's cursor on the match, and `esc` cancels. The search reads the folds:
   a row under a folded header is out of the search. Source:
   `sessionTraySearchMatches` in `src/tui/tree-model.ts`.
+- **Number jump ((Task) 306).** `g` puts a number at the start of each
+  session header, after its indent: 1, 2, 3, … from top to bottom. The
+  numbers come from the rows the tray shows, so a session under a folded tab
+  block has no number, and a session that heads a block under two tabs has
+  one number for each header. Type the digits of a number, then press
+  `enter`: the cursor goes to the session header with exactly that number.
+  `1` is session 1 and `12` is session 12; there is no prefix match and no
+  jump before `enter`. A number with no session flashes `No session <N>` and
+  keeps the jump on. `backspace` erases one digit, and a leading `0` is not
+  typed. `esc` or `g` ends the jump with no move. Any other key ends the jump
+  and then acts as usual, and a click on a row ends it too. While the jump is
+  on, the exact match wears a solid accent block, a number the digits can
+  still reach is in the accent, any other number is dim, and the hint line
+  reads `Go to session: <digits> · enter Go · bksp Erase · esc Cancel`. The
+  jump ends when the tray closes, when the panel mode changes, and when a
+  modal opens. Source: `sessionTrayJumpIndexes` and `sessionTrayJumpTarget`
+  in `src/tui/tree-model.ts`.
 - **Off setting.** With Agent Sessions off, `I` flashes the setting and opens
   nothing.
 
