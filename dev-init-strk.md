@@ -5,6 +5,7 @@ required-reading:
 orbh-sessions:
   - "[[c174bf33-b199-4688-b89b-f26247582f78]]"
   - "[[acefe761-97a3-4421-86ee-08717b7cb565]]"
+  - "[[3fb6e594-a179-4c0b-ba67-833b2ccaea67]]"
 ---
 
 # Strike
@@ -68,6 +69,14 @@ Strike binds an Operations subsection to a Flint, then launches an Orbh session 
 The **Discuss First** mode names [[dev-wkfl-strk-discuss_start]]. That workflow talks about the target in the chat, writes no Mesh artifact while it talks, and then wraps [[dev-wkfl-strk-strike_start]]. The scoped task carries a detailed summary of the discussion. Use it when the row is fuzzy and a task written before the talk would state the wrong problem.
 
 Read [[dev-knw-strk-sessions]] for the binding model, the launch chain, and the exact preamble contract.
+
+**The Operations task ((Task) 309).** When the task phrase of the preamble carries `Operations task id: <id>`, the Strike row is tied to that Operations task. Before other work, in every launch mode, read the full context of the task:
+
+```bash
+ops task context <id> --org <org>     # omit --org when the clause names no org
+```
+
+The command prints the facts of the task, the project description, the task description, and every comment of the Updates timeline, with no Waybill event. Use the description and the comments as context for the work, and carry a short summary of them into any task you scope. When the clause says `data: dev`, the id is a dev id: run `ops mode` first, and when its data mode is not `dev`, run `ndv run ops task context <id> --org <org>` instead. When no command can read the task (no credential, a deleted task, a wrong data mode), tell the operator in one sentence and continue without the context. The clause contract is in [[dev-knw-strk-sessions]].
 
 **Headless launches ((Task) 281).** `alt-h` in the launch prompt stage makes the launch headless: no Obsidian window, and the session's whole operator channel is the return-result chat (`o t` on the bound row). A headless launch offers three modes only — Strike Start, Discuss First, Create and Do Task — and points the session at `flint shard hstart strk` and the `hwkfl-strk-*` workflows. A headless session ends every turn with `return --await` or `return --finish`; the returned result is the message the operator reads.
 

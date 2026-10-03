@@ -1,5 +1,7 @@
 ---
 description: "Headless Strike Start — scope the launched target as a task, return the proposal as the turn result, and await the go"
+orbh-sessions:
+  - "[[3fb6e594-a179-4c0b-ba67-833b2ccaea67]]"
 ---
 
 > [!important] THIS FILE IS AN INSTRUCTION. WHEN REFERENCED IT IS MEANT TO BE TAKEN AS AN ACTION.
@@ -26,10 +28,12 @@ Parse the first prompt by the contract in [[knw-strk-sessions]]. Record the ids 
 flint orbh session set strike-target-id "<target id>"
 flint orbh session set strike-subsection-id "<subsection id>"
 flint orbh session set strike-ancestry "<subsection> > <ancestor> > <task>"
+flint orbh session set strike-ops-task-id "<Operations task id>"
+flint orbh session set strike-ops-org "<Operations org>"
 flint orbh session register "<task title>" "Headless: scoping the Strike target as a task."
 ```
 
-Omit a key when its clause is absent. Never invent an id.
+Omit a key when its clause is absent. The two Operations keys come from the Operations clause of the task phrase (`Operations task id: <id>, org: <org>`); omit them for a row with no such clause. Never invent an id.
 
 If the prompt carries no Strike preamble, return at once:
 
@@ -40,6 +44,7 @@ flint orbh session return --await "This session was not launched from Strike. Te
 
 ## Stage 2: Establish Context
 
+- When Stage 1 found an Operations task, run `ops task context <Operations task id> --org <Operations org>` by the rule in the headless init. Keep the description and the comments for Stage 3. When the command fails, say so in one sentence of your next result and continue.
 - Search `Mesh/Types/Tasks/` for a task that already covers this row.
 - Search `Mesh/` for artifacts naming the task title, the subsection title, or an ancestor title.
 
@@ -51,6 +56,7 @@ Run [[wkfl-proj-scope_task]] with the Strike context as input. Load `Shards/Proj
 
 - Name the Strike target id, the subsection id, and the ancestry in the task's Notes
 - State the launch context in the task's Context section
+- When Stage 2 read an Operations task context, summarise the task description and the comments in the task's Context, let them shape the requirements, and name the Operations task id, its org, and its URL in the Notes
 
 When the task exists in `todo` with its proposal written:
 

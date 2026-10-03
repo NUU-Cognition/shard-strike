@@ -2,6 +2,7 @@
 description: "Orient a Strike-launched session in its Strike context, then scope the named target as a task"
 orbh-sessions:
   - "[[acefe761-97a3-4421-86ee-08717b7cb565]]"
+  - "[[3fb6e594-a179-4c0b-ba67-833b2ccaea67]]"
 ---
 
 > [!important] THIS FILE IS AN INSTRUCTION. WHEN REFERENCED IT IS MEANT TO BE TAKEN AS AN ACTION.
@@ -31,6 +32,7 @@ Parse this session's first prompt. The contract is in [[dev-knw-strk-sessions]].
 - The task title and the Strike target id
 - The subsection title and the Operations subsection id, when the clause is present
 - The ancestry — the path of parent rows, subsection first and the task last — when the clause is present
+- The Operations task id and its org, when the task phrase carries an Operations clause (`Operations task id: <id>, org: <org>`), and `data: dev` when the clause says so
 - The operator's extra text, when present — everything after the strike_start instruction
 
 Record what you found:
@@ -39,9 +41,11 @@ Record what you found:
 flint orbh session set strike-target-id "<target id>"
 flint orbh session set strike-subsection-id "<subsection id>"
 flint orbh session set strike-ancestry "<subsection> > <ancestor> > <task>"
+flint orbh session set strike-ops-task-id "<Operations task id>"
+flint orbh session set strike-ops-org "<Operations org>"
 ```
 
-Omit the subsection key when the clause is absent, and the ancestry key when that clause is absent. Do not invent an id.
+Omit the subsection key when the clause is absent, the ancestry key when that clause is absent, and the two Operations keys when the task phrase has no Operations clause. Omit `strike-ops-org` when the clause names no org. Do not invent an id.
 
 Read the ancestry as work context, not as decoration. It tells you what the target hangs under, so the scoped task states the right problem instead of restating a leaf title.
 
@@ -63,6 +67,14 @@ Once you hold the title and the ids, progress to the next stage.
 
 Confirm your Strike knowledge is loaded. If you have not read them, read [[dev-knw-strk-strike]] and [[dev-knw-strk-sessions]] now.
 
+When Stage 1 found an Operations task, read its full context now, by the rule in the init:
+
+```bash
+ops task context <Operations task id> --org <Operations org>
+```
+
+Keep the description and the comments for Stage 3. They are the operator's own words about this work, so they outrank a guess from the title. When the command fails, tell the operator in one sentence and continue.
+
 Then gather what already exists for this work:
 
 - Search `Mesh/` for artifacts naming the task title, the subsection title, or any ancestor title
@@ -83,6 +95,7 @@ Carry the Strike context into it:
 - Set `from` to the subsection's Mesh artifact when one exists; otherwise leave it blank
 - Name the Strike target id, the subsection id, and the ancestry in the task's **Notes**, so a later session can walk back to the Strike row
 - Include the launch context in the task's **Context** section: this task came from a Strike launch on that row, under those parents
+- When Stage 2 read an Operations task context, summarise the task description and the comments in the task's **Context**, let them shape the requirements, and name the Operations task id, its org, and its URL in the **Notes**
 
 Follow every stage of that workflow, including its proposal review with the operator. It owns the task template, the numbering, and the file naming. When you present the first proposal and stop to wait for the operator, the task exists in `todo`. Set the lifecycle label to `scoped` first:
 

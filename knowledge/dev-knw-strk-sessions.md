@@ -9,6 +9,7 @@ orbh-sessions:
   - "[[8f4b956a-490e-4b34-a91b-0e3faf67ec5d]]"
   - "[[c4be5d77-f1b2-4e74-bea0-a4d34dc2f60a]]"
   - "[[99bfea21-ee80-481c-ba58-e29cd81aaf3d]]"
+  - "[[3fb6e594-a179-4c0b-ba67-833b2ccaea67]]"
 ---
 
 # Knowledge: Strike Sessions
@@ -245,10 +246,35 @@ This session was launched from Strike for task '<title>' (id: <targetId>).
 | `<subsectionTitle>` | The subsection objective row's title | Present only with the id |
 | `<subsectionId>` | The Operations subsection id | Present only with the title |
 | `<ancestor>` | A parent row's title | Title only — see below |
+| `<opsTaskId>` | The `mountId` of a row tied to an Operations task | Present only for a tied row — see "The Operations clause" |
+| `<opsOrg>` | The Operations org of that task | Present only with the task id, when the org is known |
 
 The subsection clause is all-or-nothing. A subsection named without its id is not addressable, so both drop together. When the objective heads the ancestry, it carries the subsection id there and the `under subsection` clause drops.
 
 The subsection is resolved in this order: the row's own `ops-subsection` mount, then a scope grounded in a subsection, then `pushBinding.subsectionId`, then the inherited push destination.
+
+### The Operations clause
+
+A row tied to an Operations task (`mountKind: "ops-task"`, a mount that resolves) adds one clause inside the parentheses of its task phrase ((Task) 309). Source of truth: `opsTaskClauseFields` and `opsTaskClause` in `src/orbh/preamble.ts`.
+
+```
+task '<title>' (id: <targetId>; Operations task id: <opsTaskId>, org: <opsOrg>)
+task '<title>' (id: <targetId>; Operations task id: <opsTaskId>, org: <opsOrg>, data: dev)
+task '<title>' (id: <targetId>; Operations task id: <opsTaskId>)
+```
+
+- The org is the tie's `mountOrg`, normalised by `normalizeOrgSlug`: an absent mount org means the home org. When Strike does not know the home org yet (the Operations data has not loaded), an absent mount org drops the org part. The id still resolves, because `ops` finds the org of a task from its id.
+- `data: dev` shows only when Strike runs on dev data. Then the id is a dev Operations id. Prod data adds nothing.
+- An `ops-subsection` mount, an `ops-backlog` mount, a dangling mount (`mountMissing`), and an untied row add no clause. Their prompts are byte for byte the same as before (Task) 309.
+- A together launch builds each task phrase alone, so each tied target carries its own clause.
+
+The session gets the full context of the Operations task with one command:
+
+```bash
+ops task context <opsTaskId> --org <opsOrg>
+```
+
+It prints one Markdown block: the facts of the task (status, priority, place, owner, creator, URL), the project description, the task description, and every comment of the Updates timeline, oldest first, with no Waybill event. The command wraps the gateway op `agent.taskContext`. `--json` prints the op result. See the Operations shard (`knw-ops-cli`) for the command reference.
 
 **Ancestry rules.**
 
@@ -305,13 +331,15 @@ Whatever was typed in the prompt stage. Newlines collapse to spaces. It comes la
 - The Flint it woke in is the one bound to that subsection.
 - The ancestry, when present, names live Strike rows that stood above the target at launch time.
 - The operator was looking at that exact row when they pressed `o l`.
+- When the task phrase carries an Operations clause, the row was tied to that Operations task at launch time, and the id is an Operations task id of the named org (a dev id when the clause says `data: dev`).
 - That a prompt naming more than one task is deliberate. The operator marked that set and launched it as one piece of work, and one session holds all of it.
 
 **May not assume:**
 
 - That the ids still resolve. The operator can delete or re-pull a row after launching.
 - That the tasks of a together-launch are linked in Strike. (Task) 230 makes them share only the session in this version.
-- That an Operations task exists. The preamble carries no Operations task id, and the row may hold no mount at all.
+- That an Operations task exists when the task phrase has no Operations clause. Such a row may hold no mount at all, or a mount of another kind.
+- That the Operations task still holds the title it had at launch. Read it with `ops task context`.
 - That a subsection clause is present. Every row created after (Task) 215 has a subsection, so the clause is expected; an older prompt, or a row whose subsection no longer resolves, may still lack it. Tolerate the missing clause instead of failing.
 - That an ancestry clause is present. A row that hangs under nothing has none.
 - That the ancestry names every parent. The path is one line up the graph, and a target may be required by several rows.

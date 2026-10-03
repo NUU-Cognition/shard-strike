@@ -2,6 +2,8 @@
 required-reading:
   - "[[knw-strk-strike]]"
   - "[[knw-strk-sessions]]"
+orbh-sessions:
+  - "[[3fb6e594-a179-4c0b-ba67-833b2ccaea67]]"
 ---
 
 # Strike — Headless Init
@@ -39,7 +41,8 @@ flint orbh session return --finish "<result>"   # the work is done
 flint orbh session set strike-lifecycle <value>
 ```
 
-- **Record the Strike ids** (`strike-target-id`, `strike-subsection-id`, `strike-ancestry`) exactly as the interactive workflows do.
+- **Record the Strike ids** (`strike-target-id`, `strike-subsection-id`, `strike-ancestry`, and for a tied row `strike-ops-task-id` and `strike-ops-org`) exactly as the interactive workflows do.
+- **Read the Operations task of a tied row.** When the task phrase of the preamble carries `Operations task id: <id>`, the Strike row is tied to that Operations task. Before other work, in every launch mode, read the full context of the task. Run `ops task context <id> --org <org>` (omit `--org` when the clause names no org). The command prints the facts of the task, the project description, the task description, and every comment of the Updates timeline, with no Waybill event. Use the description and the comments as context for the work, and carry a short summary of them into any task you scope. When the clause says `data: dev`, the id is a dev id: run `ops mode` first, and when its data mode is not `dev`, run `ndv run ops task context <id> --org <org>` instead. When no command can read the task (no credential, a deleted task, a wrong data mode), say so in one sentence of your next result and continue without the context. The clause contract is in [[knw-strk-sessions]].
 - **Register the session** with the task title, so every Orbh surface names it.
 - Session messages from Strike (`Strike: …`) are events, not operator replies. Read them, update your keys, and continue.
 - All artifact conventions (templates, frontmatter, `orbh-sessions`, authors) are unchanged.
