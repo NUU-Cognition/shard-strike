@@ -8,6 +8,7 @@ orbh-sessions:
   - "[[6516416f-28e4-41e7-9364-3887f07b4eb4]]"
   - "[[00c93799-6730-4346-b597-22b2550b2cc1]]"
   - "[[6b9d1c77-c2bd-464f-a404-fbc9b59141c3]]"
+  - "[[6b31fc7d-08f6-44ac-bd4c-92f8022e69c9]]"
   - "[[12e6ab26-ddf4-4e5f-9ce7-def93bbf84a3]]"
   - "[[8f4b956a-490e-4b34-a91b-0e3faf67ec5d]]"
   - "[[2177139a-5247-4a1a-914e-8e8bc53358e2]]"
@@ -477,6 +478,9 @@ Rules that hold across the grid:
 - `h` and `H` both arm a one-shot return memory, so `l` on the parent returns to the child the cursor left.
 - Reorder (nudge) lives on `ctrl-shift-↑`/`↓`. It is an edit, not a movement. (Task) 230 makes a stored overlay member behave as an ordinary row.
 - Placement mode and select mode route the same movement table as normal mode.
+- A finish moves the cursor to the row under the finished row ((Task) 308). The finished row sorts into the done block of its sibling group, and its visible subtree goes with it, so the cursor does not follow it. The cursor lands on the first stop below the row and its subtree, in the cursor's display column, as the list stood before the finish. The rule covers the finish menu, `ctrl-space`, `shift-space` on a todo row, the Finishing Blow, Verify failed, and the bulk finish of select mode when the cursor row is marked.
+- A finish run that creates a row (a follow up, a skill check, a progression) puts the cursor on the new row, as every create does. The cursor stays on the finished row when the finish is refused, when nothing stands below it, and when the operator moves the cursor before the write lands. A finish that no cursor started moves nothing: the session overlay, a peer, Operations, `strike session finish`, and `:finish <ref>`.
+- The skill check tray and the Sessions Tray apply the same rule to their own cursor. The doing peek needs no rule: it drops a finished row, and its cursor falls to the row below. Source of truth: `finishSuccessorId` and `finishSuccessorPeekIndex` in `src/tui/tree-model.ts`, and `captureFinishCursor` in `src/tui/app.ts`.
 
 ## Select Mode
 
