@@ -116,6 +116,16 @@ A session accumulates targets. The operator links another row to a live session 
 
 `strike session finish <sessionId>` reads that sidecar and finishes the whole set. Run [[dev-sk-strk-close]] to end a session: it shows the operator the list, finishes what can be finished, reports what cannot, and hands off to the Orbh close skill.
 
+## The Sync Log
+
+Strike writes each sync event to its Foundation event log ((Task) 311). When the operator reports a sync fault (offline, `SYNC FAILED`, a row that does not arrive, a command that does not apply), read the log before you read code or try to reproduce the fault:
+
+```bash
+flint foundation logs --service strike --role tui --event sync --since 30m
+```
+
+The log holds ids, codes, revisions, counts, and durations, never a title or a token. Read [[knw-strk-sync_log]] for the commands, where to look first for each fault, and the event names.
+
 ## Rules
 
 - Strike declares no Mesh artifact type. Task artifacts belong to the Projects shard.

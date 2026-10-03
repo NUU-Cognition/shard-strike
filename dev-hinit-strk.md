@@ -46,6 +46,7 @@ flint orbh session set strike-lifecycle <value>
 - **Register the session** with the task title, so every Orbh surface names it.
 - Session messages from Strike (`Strike: …`) are events, not operator replies. Read them, update your keys, and continue.
 - All artifact conventions (templates, frontmatter, `orbh-sessions`, authors) are unchanged.
+- **Read the sync log for a sync fault.** When the work is a Strike sync fault (offline, `SYNC FAILED`, a row that does not arrive, a command that does not apply), read the sync log before you read code: `flint foundation logs --service strike --role tui --event sync --since 30m`. The log holds ids, codes, revisions, counts, and durations, never a title or a token. See [[knw-strk-sync_log]].
 
 ## Workflows
 
