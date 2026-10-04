@@ -17,6 +17,7 @@ orbh-sessions:
   - "[[47411044-3fbf-4dcc-b869-9641652bcce7]]"
   - "[[3976181c-02d1-44ac-84a1-05a703de6355]]"
   - "[[4a3ef60d-34cb-4830-87ac-14e6ea180c45]]"
+  - "[[3b47c9d7-bfa1-4480-b0e4-1f8c46cf0703]]"
 ---
 
 # Knowledge: Strike
@@ -244,6 +245,16 @@ Operations enters the graph through one door: the flat DESTINATION picker (`ops-
 **Dependencies pull with the unit ((Task) 233).** A subsection's `dependsOn` subsections are part of its meaning — an open dependency blocks the objective — so every pull route above also pulls each dependency the store does not already hold, as a full unit, recursively down the chain. A failed dependency pull never fails the gesture; the derived dependency row keeps standing in until a later pull lands it. A scope anchor row (a boss, a backlog anchor) never wears the foreign-scope dim in the tree; an OPEN anchor's title renders pure white and underlined (`strikeTuiTokens.tree.boss`), and only doneness recedes it.
 
 **Startup.** With no tab, or with tabs whose subsections the store no longer holds, Strike renders an empty pane reading "Choose a subsection to begin" and opens the picker once (`EMPTY_TABS_TEXT`, `src/tui/views/empty-tabs.ts`). Signed out, or with no Operations client, the same pane reads "Sign in with , then choose a subsection" and opens nothing.
+
+### Picker Recents
+
+Every picker lists the items the operator picked last first ((Task) 319). The order rule is written once, in `src/picker-recents.ts`:
+
+- With an empty query, the recent items lead, newest first. Every other item keeps the order the picker gives it.
+- With a query, the match ranking of the picker stays first. Recent use breaks a tie. The old order breaks the rest. A plain substring filter has one rank, so its recent matches lead.
+- An item that no longer exists never shows and never fails. The list is not pruned from one picker view, because a view can be narrowed. The cap of 30 ids for each kind ages old ids out.
+
+A pick is recorded when the picker commits it (Enter, a double click, a digit). A toggle list records the items its save turns on. The recents are one list for each picker **kind**, not for each gesture: `destination` (subsections and project backlogs, the key `org::kind::id`), `deliverable`, `target`, `scope`, `tab` (the root subsection of the tab), `person`, `flint`, `session`, `profile`, `account` (`runtime/name`), `device`, `command` (the palette id; a command run on the command line counts too), and `ops-task`. The Operations page picks share these kinds, so a subsection picked on the page leads the destination picker too. A priority pick keeps its scale. The help list, the People map, the go-to searches, the Subsection Manager, and the projects pane of the Operations page keep their own order: they are not pickers.
 
 ### The Subsection Manager
 
@@ -560,6 +571,7 @@ The tabs file is at version **8** (`src/tui/tab-store.ts`). It gets no backup �
 | `~/.nuucognition/strike-orbh.json`, `strike-people.json`, `strike-fights.json` | Sidecars: session bindings, the people cache, fights |
 | `~/.nuucognition/strike.json` | The credential and the client's default `orgSlug`, mode `0600` |
 | `~/.nuucognition/strike-settings.json` | UI settings — never graph state. People is always on. Agent Sessions defaults on. |
+| `~/.nuucognition/strike-recents.json` | Picker recents ((Task) 319): the ids picked last, for each picker kind, newest first. Never graph state, never synced. `STRIKE_RECENTS_PATH` overrides it; a test run with no override keeps the recents in memory |
 
 There is one store and no home organisation. Ties inside the store name their own organisation (see `mountOrg` above); there is no org switch. The `orgSlug` in `strike.json` is only the default org for a raw id given without `--org` (the personal workspace after login). `:org` lists the organisations the credential belongs to.
 
