@@ -18,6 +18,7 @@ orbh-sessions:
   - "[[3976181c-02d1-44ac-84a1-05a703de6355]]"
   - "[[4a3ef60d-34cb-4830-87ac-14e6ea180c45]]"
   - "[[3b47c9d7-bfa1-4480-b0e4-1f8c46cf0703]]"
+  - "[[42db864b-74ea-467a-9d4c-0c22ce8a176d]]"
 ---
 
 # Knowledge: Strike
@@ -494,6 +495,23 @@ Rules that hold across the grid:
 - A finish moves the cursor to the row under the finished row ((Task) 308). The finished row sorts into the done block of its sibling group, and its visible subtree goes with it, so the cursor does not follow it. The cursor lands on the first stop below the row and its subtree, in the cursor's display column, as the list stood before the finish. The rule covers the finish menu, `ctrl-space`, `shift-space` on a todo row, the Finishing Blow, Verify failed, and the bulk finish of select mode when the cursor row is marked.
 - A finish run that creates a row (a follow up, a skill check, a progression) puts the cursor on the new row, as every create does. The cursor stays on the finished row when the finish is refused, when nothing stands below it, and when the operator moves the cursor before the write lands. A finish that no cursor started moves nothing: the session overlay, a peer, Operations, `strike session finish`, and `:finish <ref>`.
 - The skill check tray and the Sessions Tray apply the same rule to their own cursor. The doing peek needs no rule: it drops a finished row, and its cursor falls to the row below. Source of truth: `finishSuccessorId` and `finishSuccessorPeekIndex` in `src/tui/tree-model.ts`, and `captureFinishCursor` in `src/tui/app.ts`.
+- A self advance ((Task) 336) wins over the row below: when the finish started a row, the cursor goes to that row. See § Self Advance.
+
+## Self Advance
+
+After the operator finishes the doing row of a sequence, Strike starts the next row of that sequence by itself ((Task) 336). Source of truth: `planSelfAdvance` in `src/command/self-advance.ts`, and `finishWithAdvance` in `src/tui/app.ts`.
+
+| Rule | What happens |
+|------|--------------|
+| Sequence | The visible children of the finished row's parent, in display order, in the band of the finished row: stages with stages, tasks with tasks. The parent is the tree parent of the cursor row. From a panel it is the row's one live parent. A row with two parents and no cursor parent does not advance. |
+| Still doing | When another row of the band is still doing on this machine, the work continues there and nothing advances. |
+| Next row | The first sibling that the advance can enter. A todo task that is open and that no other machine claims starts. A todo stage with no open work under it is a phase of its own, and it starts. A stage with open work under it is entered at its first open task, by the same rule. When a task under it is already doing, the cursor goes there and nothing starts. A blocked task, a task that another machine is doing, a combo, an anchor, and an attempt are passed. |
+| Stage close | When no sibling can be entered and the parent is a stage whose every non-attempt child is done, Strike finishes the stage and goes on one level up. A stage that holds a blocked task, a claimed task, or an open sub-stage stays open, and the advance stops. |
+| Derived status | The advance never starts or closes a combo or an anchor. The Finishing Blow and the roll-up do that. The advance never finishes or starts a parent that is not a stage. |
+| Scope | The setting **Self Advance** (default on) acts when the finished row is a stage or its parent is a stage. **Advance Every Target** (default off) also acts under a parent that is not a stage, for example the next target of a subsection. |
+| Gestures | The plain finish of a row that was `doing`: `ctrl-space`, `space` with the finish menu off, the finish menu commit with no step that creates a row, and the Finishing Blow, from the tree or from the Doing menu. Never: the bulk finish, a finish run that creates a row (follow up, skill check, progression, Verify failed), `shift-space` on a todo row, the session overlay, `:finish`, a peer, Operations, and `strike session finish`. |
+| Writes and undo | The finish is its own undo entry. The advance runs `client.finish` and `client.start` in one journal group, so one `u` takes the advance back and keeps the finish. The writes take the ordinary command and sync path, and the engine guards still refuse a blocked row or a row that another machine holds. |
+| Cursor and flash | When the tree cursor started the finish, the cursor goes to the row that the advance landed on, and the folded ancestors of that row open. Else the (Task) 308 rule holds. The flash names the result, for example `Finished "A1" · closed "Stage 1" · started "B1"`. |
 
 ## Select Mode
 
