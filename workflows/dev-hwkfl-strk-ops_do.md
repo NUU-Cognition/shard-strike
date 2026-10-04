@@ -14,6 +14,12 @@ The headless form of [[dev-wkfl-strk-ops_do]]. It runs beside the headless workf
 
 The work is tied to an Operations task when the Strike preamble carries an Operations clause, when the Mesh task of the work has the field `ops-task`, or when the operator's message names an Operations task id or URL.
 
+# Input
+
+- The launch prompt, the Mesh task, or the wake message that names the Operations task
+- The `ops` CLI on PATH with a signed-in credential (`ops whoami`)
+- Wake messages from the operator on later turns
+
 # Rules
 
 Obey the eight rules of [[dev-wkfl-strk-ops_do]]: write only to the linked task, read before you write, post few comments, sign each comment, check before you repeat a write, respect the data mode, respect the derived state, and write in Simplified Technical English. Two rules are stricter here:
