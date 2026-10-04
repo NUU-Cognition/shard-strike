@@ -4,6 +4,7 @@ required-reading:
   - "[[knw-strk-sessions]]"
 orbh-sessions:
   - "[[3fb6e594-a179-4c0b-ba67-833b2ccaea67]]"
+  - "[[61b5f523-537e-425e-ab9a-002b3c2dac39]]"
 ---
 
 # Strike — Headless Init
@@ -43,6 +44,7 @@ flint orbh session set strike-lifecycle <value>
 
 - **Record the Strike ids** (`strike-target-id`, `strike-subsection-id`, `strike-ancestry`, and for a tied row `strike-ops-task-id` and `strike-ops-org`) exactly as the interactive workflows do.
 - **Read the Operations task of a tied row.** When the task phrase of the preamble carries `Operations task id: <id>`, the Strike row is tied to that Operations task. Before other work, in every launch mode, read the full context of the task. Run `ops task context <id> --org <org>` (omit `--org` when the clause names no org). The command prints the facts of the task, the project description, the task description, and every comment of the Updates timeline, with no Waybill event. Use the description and the comments as context for the work, and carry a short summary of them into any task you scope. When the clause says `data: dev`, the id is a dev id: run `ops mode` first, and when its data mode is not `dev`, run `ndv run ops task context <id> --org <org>` instead. When no command can read the task (no credential, a deleted task, a wrong data mode), say so in one sentence of your next result and continue without the context. The clause contract is in [[knw-strk-sessions]].
+- **Work with Operations ((Task) 341).** A tied launch ends its instructions with one Operations sentence that names [[hwkfl-strk-ops_do]]. Follow that workflow beside the workflow of the launch mode: it starts the Operations task, posts one place-relative update at each meaningful point (start, blocker, review stop, done), writes only to the linked task, and ends each comment with the agent signature line. It never writes to a task found only by place, and it runs `ops task done` only when the operator tells you to.
 - **Register the session** with the task title, so every Orbh surface names it.
 - Session messages from Strike (`Strike: …`) are events, not operator replies. Read them, update your keys, and continue.
 - All artifact conventions (templates, frontmatter, `orbh-sessions`, authors) are unchanged.
@@ -55,3 +57,4 @@ flint orbh session set strike-lifecycle <value>
 | [[hwkfl-strk-strike_start]] | Default launch mode: scope the target as a task, await the go |
 | [[hwkfl-strk-discuss_start]] | Discuss First: talk through awaited returns, then scope |
 | [[hwkfl-strk-create_and_do]] | Create and Do: create the task, do the work, return the summary |
+| [[hwkfl-strk-ops_do]] | Beside any mode, when the row is tied to an Operations task: read it, start it, post its updates |

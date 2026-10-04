@@ -2,6 +2,7 @@
 description: "Headless Strike Start — scope the launched target as a task, return the proposal as the turn result, and await the go"
 orbh-sessions:
   - "[[3fb6e594-a179-4c0b-ba67-833b2ccaea67]]"
+  - "[[61b5f523-537e-425e-ab9a-002b3c2dac39]]"
 ---
 
 > [!important] THIS FILE IS AN INSTRUCTION. WHEN REFERENCED IT IS MEANT TO BE TAKEN AS AN ACTION.
@@ -56,7 +57,7 @@ Run [[wkfl-proj-scope_task]] with the Strike context as input. Load `Shards/Proj
 
 - Name the Strike target id, the subsection id, and the ancestry in the task's Notes
 - State the launch context in the task's Context section
-- When Stage 2 read an Operations task context, summarise the task description and the comments in the task's Context, let them shape the requirements, and name the Operations task id, its org, and its URL in the Notes
+- When Stage 2 read an Operations task context, summarise the task description and the comments in the task's Context, let them shape the requirements, and name the Operations task id, its org, and its URL in the Notes. Also set the frontmatter fields `ops-task` and `ops-org` of the task ([[dev-hwkfl-strk-ops_do]])
 
 When the task exists in `todo` with its proposal written:
 
@@ -74,7 +75,7 @@ The returned result carries: the task name, the problem in two or three sentence
 
 The next wake carries the operator's reply.
 
-- **go** (or a clear confirmation): run [[wkfl-proj-do_task]] on the task. Work until done or blocked. Then set the lifecycle label (`review` when finished, `input` when blocked) and `return --await` with the completion summary or the blocker.
+- **go** (or a clear confirmation): run [[wkfl-proj-do_task]] on the task. When the row is tied to an Operations task, follow [[dev-hwkfl-strk-ops_do]] beside it: the go is the start of the Operations task, and the blocker and the review stop each get one update. Work until done or blocked. Then set the lifecycle label (`review` when finished, `input` when blocked) and `return --await` with the completion summary or the blocker.
 - **Change requests**: apply them to the task, set the label to `discussing`, and `return --await` with the updated proposal.
 - **Stop**: set the task to the state the operator names, and `return --finish` with a one-line close.
 

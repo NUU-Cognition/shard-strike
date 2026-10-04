@@ -1,5 +1,7 @@
 ---
 description: "Headless Create and Do — create the task, work it to completion, and return the completion summary; review rides the returned result"
+orbh-sessions:
+  - "[[61b5f523-537e-425e-ab9a-002b3c2dac39]]"
 ---
 
 > [!important] THIS FILE IS AN INSTRUCTION. WHEN REFERENCED IT IS MEANT TO BE TAKEN AS AN ACTION.
@@ -31,6 +33,7 @@ flint orbh session register "<task title>" "Headless: creating and doing the Str
 Run [[wkfl-proj-create_and_do_task]] Stages 1 and 2. Load `Shards/Projects/init-proj.md` first.
 
 - Record the Strike target id and the subsection id in the task's Notes
+- When the row is tied to an Operations task, follow [[dev-hwkfl-strk-ops_do]] beside this workflow: set the frontmatter fields `ops-task` and `ops-org` of the task, start the Operations task at this stage, and post one update at a blocker and at the review stop
 - Tick checkboxes as you complete them; keep the Task Log current
 - Commit WIP by [[knw-proj-wip_commits]] when the task edits a repo
 

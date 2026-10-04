@@ -3,6 +3,7 @@ description: "Orient a Strike-launched session in its Strike context, then scope
 orbh-sessions:
   - "[[acefe761-97a3-4421-86ee-08717b7cb565]]"
   - "[[3fb6e594-a179-4c0b-ba67-833b2ccaea67]]"
+  - "[[61b5f523-537e-425e-ab9a-002b3c2dac39]]"
 ---
 
 > [!important] THIS FILE IS AN INSTRUCTION. WHEN REFERENCED IT IS MEANT TO BE TAKEN AS AN ACTION.
@@ -95,7 +96,7 @@ Carry the Strike context into it:
 - Set `from` to the subsection's Mesh artifact when one exists; otherwise leave it blank
 - Name the Strike target id, the subsection id, and the ancestry in the task's **Notes**, so a later session can walk back to the Strike row
 - Include the launch context in the task's **Context** section: this task came from a Strike launch on that row, under those parents
-- When Stage 2 read an Operations task context, summarise the task description and the comments in the task's **Context**, let them shape the requirements, and name the Operations task id, its org, and its URL in the **Notes**
+- When Stage 2 read an Operations task context, summarise the task description and the comments in the task's **Context**, let them shape the requirements, and name the Operations task id, its org, and its URL in the **Notes**. Also set the frontmatter fields `ops-task` and `ops-org` of the task ([[dev-wkfl-strk-ops_do]])
 
 Follow every stage of that workflow, including its proposal review with the operator. It owns the task template, the numbering, and the file naming. When you present the first proposal and stop to wait for the operator, the task exists in `todo`. Set the lifecycle label to `scoped` first:
 
@@ -130,7 +131,7 @@ If the operator says **go**, treat the spec as confirmed and progress to the nex
   flint orbh session set strike-lifecycle scoped
   ```
 
-If the operator said **go**, run [[wkfl-proj-do_task]] now. Do not wait again.
+If the operator said **go**, run [[wkfl-proj-do_task]] now. Do not wait again. When the row is tied to an Operations task, follow [[dev-wkfl-strk-ops_do]] beside it: the go is the start of the Operations task, and the blocker, the review stop, and the done each get one update.
 
 If the operator did not say go, stop here — the task stands on its own. Do not offer the next step a second time.
 

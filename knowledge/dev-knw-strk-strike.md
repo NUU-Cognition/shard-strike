@@ -19,6 +19,7 @@ orbh-sessions:
   - "[[4a3ef60d-34cb-4830-87ac-14e6ea180c45]]"
   - "[[3b47c9d7-bfa1-4480-b0e4-1f8c46cf0703]]"
   - "[[42db864b-74ea-467a-9d4c-0c22ce8a176d]]"
+  - "[[61b5f523-537e-425e-ab9a-002b3c2dac39]]"
 ---
 
 # Knowledge: Strike
@@ -312,6 +313,8 @@ version can restore the blocks that have a `(Task) 230` comment.
 
 `esc` closes a filter, then returns from the Deliverable view to Projects with the deliverable selected, then closes the page; `q` closes the page. Derived statuses (subsection: done, blocked, in-progress, ready; deliverable: completed, blocked, in-progress, open) come from `src/ops/dag-status.ts`, a port of the web rules. Server refusals (`closer_locked`, `subsection_blocked`, `dependency_order_invalid`, …) flash with the server's message.
 
+**The Flint tie ((Task) 341).** `f` in the deliverables pane picks a registered Flint and writes the Flint place of the deliverable with `deliverables.setFlintPlace`: the canonical Flint address and, when the registry id is a UUID, the Flint id. `flintAddressOf` in `src/orbh/flint-address.ts` computes the address that `flint org show` prints (`@<org>/flint[.<subtype>]/<slug>`, or `@/flint/<slug>` for a Flint with no org). The clear row sends `address: null` and clears both. A Flint with no address (an older registry row with no org) flashes a refusal. A deployment before (Task) 317 has no `setFlintPlace`: the client then writes the Flint id alone through `deliverables.update`, and it remembers that for the connection. An agent in a Flint finds the deliverables of its Flint by this place ([[dev-wkfl-strk-ops_do]]).
+
 `M` on a subsection row converts the subsection to a task. The destination picker offers the project backlog and peer subsections. The action consumes the subsection. It keeps the title and the creation time.
 
 The conversion accepts only an empty, plain subsection. The subsection must have no outgoing dependency. Only its closer can depend on it. The action removes that structural closer edge. The subsection must have no due date, deployment, priority colour, or completion data. Strike must not hold or replicate the subsection. The closer cannot become a task. This action exists only on the Operations page. It does not convert a held graph subsection.
@@ -468,7 +471,7 @@ Project → Deliverable → Subsection → Task
 | Entity | Notable fields |
 |--------|----------------|
 | `OpsProject` | `kind` (`project` or `operation`), `status` (`active`, `paused`, `archived`) |
-| `OpsDeliverable` | `projectId`, `flintId` — the tie from a deliverable to a Flint |
+| `OpsDeliverable` | `projectId`; `flintAddress` and `flintId` — the Flint place of the deliverable ((Task) 317, (Task) 341) |
 | `OpsSubsection` | `deliverableId`, `dueDate`, `order`, `dependsOn[]`, `isCloser` |
 | `OpsTask` | `subsectionId`, `status`, `priority` (`queue`…`urgent`), `ownerUserId`, `rarity` |
 

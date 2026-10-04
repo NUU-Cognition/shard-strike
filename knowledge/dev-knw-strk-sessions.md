@@ -11,6 +11,7 @@ orbh-sessions:
   - "[[99bfea21-ee80-481c-ba58-e29cd81aaf3d]]"
   - "[[3fb6e594-a179-4c0b-ba67-833b2ccaea67]]"
   - "[[01286b97-7ae5-4fb6-ab72-1efcbca3c525]]"
+  - "[[61b5f523-537e-425e-ab9a-002b3c2dac39]]"
 ---
 
 # Knowledge: Strike Sessions
@@ -213,7 +214,7 @@ Every route above ends in the NUU plugin inside the bound Flint's Obsidian windo
 
 ## The Composed Prompt Contract
 
-Source of truth: `src/orbh/preamble.ts`. The prompt has three parts, joined by single spaces, always on **one line** — the plugin types it into a pty as one shell-escaped argument.
+Source of truth: `src/orbh/preamble.ts`. The prompt has four parts, joined by single spaces, always on **one line** — the plugin types it into a pty as one shell-escaped argument. The third part is present only for a tied launch.
 
 ### 1. The preamble
 
@@ -270,7 +271,7 @@ task '<title>' (id: <targetId>; Operations task id: <opsTaskId>)
 - An `ops-subsection` mount, an `ops-backlog` mount, a dangling mount (`mountMissing`), and an untied row add no clause. Their prompts are byte for byte the same as before (Task) 309.
 - A together launch builds each task phrase alone, so each tied target carries its own clause.
 
-The session gets the full context of the Operations task with one command:
+The session gets the full context of the Operations task with one command. The Operations sentence (part 3) names it in every launch mode:
 
 ```bash
 ops task context <opsTaskId> --org <opsOrg>
@@ -310,9 +311,9 @@ The operator picks a launch mode with `Tab` in the prompt stage. The default is 
 | Discuss First | ``Run `flint shard start strk`, then follow the wkfl-strk-discuss_start workflow before other work.`` |
 | Create and Do Task | ``Run `flint shard start strk`, then follow the wkfl-proj-create_and_do_task workflow for this task before other work; record the Strike target id and the subsection id in the task's Notes.`` |
 | Notepad | ``Run `flint shard start strk`, then follow the wkfl-ntpd-start workflow with this task as the topic before other work.`` |
-| None | No instruction. The preamble goes alone, then the extra text. |
+| None | No instruction. The preamble goes alone, then the Operations sentence of a tied launch, then the extra text. |
 
-Every mode except None loads the Strike shard first, so the session can read this contract and record the ids it was given.
+Every mode except None loads the Strike shard first, so the session can read this contract and record the ids it was given. A tied launch in the None mode loads it through the Operations sentence (part 3).
 
 **Discuss First is a wrapper, and the prompt does not say so.** The instruction names `wkfl-strk-discuss_start` and nothing else. That workflow discusses the target in the chat, writes no Mesh artifact while it talks, and hands off to [[dev-wkfl-strk-strike_start]] only when the operator agrees. The handoff is the workflow's decision, not the prompt's, so the prompt stays one sentence like every other mode. `Tab` puts the mode second in the cycle, right after the mode it wraps.
 
@@ -320,7 +321,23 @@ Every mode except None loads the Strike shard first, so the session can read thi
 
 **Headless launch ((Task) 281).** `alt-h` in the prompt stage toggles a headless launch. A headless launch offers exactly three modes — Strike Start, Discuss First, Create and Do Task — and each instruction swaps to its headless form: `flint shard hstart strk`, then `hwkfl-strk-strike_start`, `hwkfl-strk-discuss_start`, or `hwkfl-strk-create_and_do`. A notepad is a conversation surface and `none` leaves no return contract, so neither exists headless. The launch shells out to `flint orbh launch <profile> <prompt>` in the bound Flint's root — no Obsidian window anywhere on the path — and Strike parses the session id from the CLI's `ID:` line.
 
-### 3. The operator's extra text
+### 3. The Operations sentence
+
+A launch that carries a row tied to an Operations task adds one sentence after the mode instruction ((Task) 309 review, (Task) 341). It stands in **every** mode, None included: the mode chooses a workflow, and the context read and the updates belong to no one mode workflow. Source of truth: `opsContextInstruction` in `src/orbh/preamble.ts`.
+
+```
+The task is tied to an Operations task: run `ops task context <opsTaskId> --org <opsOrg>` before other work, and follow the wkfl-strk-ops_do workflow of the Strike shard (`flint shard start strk`) to start it and post its updates.
+```
+
+- **Several tied rows.** A together launch names the command of each tied task in row order: ``2 tasks are tied to Operations tasks: run `ops task context a --org o` and `ops task context b --org o` before other work, and follow … to start them and post their updates.`` One tied row among several reads `One task is tied to an Operations task: …`.
+- **No org.** A context with no org drops `--org`, as the clause does.
+- **Headless.** The sentence names `hwkfl-strk-ops_do` and `flint shard hstart strk`.
+- **Dev data.** The sentence adds ``The id is a dev id: run `ops mode` first, and when it does not show dev data, start each command with `ndv run`.`` (``The ids are dev ids`` for several).
+- **Untied.** A launch with no tied row adds nothing. Its prompt is byte for byte the prompt before (Task) 309.
+
+The workflow [[dev-wkfl-strk-ops_do]] (headless [[dev-hwkfl-strk-ops_do]]) runs beside the workflow of the mode. It finds the linked task (the clause, the `ops-task` field of a Mesh task, the operator, or the Flint place of a deliverable), reads its context, starts it when the implementation starts, and posts one place-relative update at the start, at a blocker, at a review stop, and at done. It writes only to the linked task and ends each comment with the agent signature line.
+
+### 4. The operator's extra text
 
 Whatever was typed in the prompt stage. Newlines collapse to spaces. It comes last, so it is the operator's final word and may override the instruction above it.
 
@@ -333,7 +350,7 @@ Whatever was typed in the prompt stage. Newlines collapse to spaces. It comes la
 - The Flint it woke in is the one bound to that subsection.
 - The ancestry, when present, names live Strike rows that stood above the target at launch time.
 - The operator was looking at that exact row when they pressed `o l`.
-- When the task phrase carries an Operations clause, the row was tied to that Operations task at launch time, and the id is an Operations task id of the named org (a dev id when the clause says `data: dev`).
+- When the task phrase carries an Operations clause, the row was tied to that Operations task at launch time, and the id is an Operations task id of the named org (a dev id when the clause says `data: dev`). The prompt then also carries the Operations sentence.
 - That a prompt naming more than one task is deliberate. The operator marked that set and launched it as one piece of work, and one session holds all of it.
 
 **May not assume:**

@@ -6,6 +6,7 @@ orbh-sessions:
   - "[[c174bf33-b199-4688-b89b-f26247582f78]]"
   - "[[acefe761-97a3-4421-86ee-08717b7cb565]]"
   - "[[3fb6e594-a179-4c0b-ba67-833b2ccaea67]]"
+  - "[[61b5f523-537e-425e-ab9a-002b3c2dac39]]"
 ---
 
 # Strike
@@ -77,6 +78,8 @@ ops task context <id> --org <org>     # omit --org when the clause names no org
 ```
 
 The command prints the facts of the task, the project description, the task description, and every comment of the Updates timeline, with no Waybill event. Use the description and the comments as context for the work, and carry a short summary of them into any task you scope. When the clause says `data: dev`, the id is a dev id: run `ops mode` first, and when its data mode is not `dev`, run `ndv run ops task context <id> --org <org>` instead. When no command can read the task (no credential, a deleted task, a wrong data mode), tell the operator in one sentence and continue without the context. The clause contract is in [[dev-knw-strk-sessions]].
+
+**Work with Operations ((Task) 341).** A tied launch ends its instructions with one Operations sentence, in every launch mode, None included. The sentence names the `ops task context` command of each tied task and the workflow [[dev-wkfl-strk-ops_do]]. Follow that workflow beside the workflow of the launch mode. It starts the Operations task when the implementation starts, and it posts one place-relative update at the start, at a blocker, at a review stop, and at done, through `ops comment add`. It writes only to the linked task, and it ends each comment with the agent signature line. It also finds the Operations work of this Flint by place: the deliverables whose Flint place (`flintAddress`, or `flintId`) is this Flint. A Mesh task that is tied to an Operations task carries the frontmatter fields `ops-task` and `ops-org`.
 
 **Headless launches ((Task) 281).** `alt-h` in the launch prompt stage makes the launch headless: no Obsidian window, and the session's whole operator channel is the return-result chat (`o t` on the bound row). A headless launch offers three modes only — Strike Start, Discuss First, Create and Do Task — and points the session at `flint shard hstart strk` and the `hwkfl-strk-*` workflows. A headless session ends every turn with `return --await` or `return --finish`; the returned result is the message the operator reads.
 
