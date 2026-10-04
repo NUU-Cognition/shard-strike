@@ -267,7 +267,7 @@ task '<title>' (id: <targetId>; Operations task id: <opsTaskId>)
 ```
 
 - The org is the tie's `mountOrg`, normalised by `normalizeOrgSlug`: an absent mount org means the home org. When Strike does not know the home org yet (the Operations data has not loaded), an absent mount org drops the org part. The id still resolves, because `ops` finds the org of a task from its id.
-- `data: dev` shows only when Strike runs on dev data. Then the id is a dev Operations id. Prod data adds nothing.
+- `data: dev` shows only when Strike runs on dev data. Then the id is a dev Operations id, and the Operations sentence puts `OPS_DATA_MODE=dev ndv run` before each command. Prod data adds nothing.
 - An `ops-subsection` mount, an `ops-backlog` mount, a dangling mount (`mountMissing`), and an untied row add no clause. Their prompts are byte for byte the same as before (Task) 309.
 - A together launch builds each task phrase alone, so each tied target carries its own clause.
 
@@ -332,7 +332,7 @@ The task is tied to an Operations task: run `ops task context <opsTaskId> --org 
 - **Several tied rows.** A together launch names the command of each tied task in row order: ``2 tasks are tied to Operations tasks: run `ops task context a --org o` and `ops task context b --org o` before other work, and follow … to start them and post their updates.`` One tied row among several reads `One task is tied to an Operations task: …`.
 - **No org.** A context with no org drops `--org`, as the clause does.
 - **Headless.** The sentence names `hwkfl-strk-ops_do` and `flint shard hstart strk`.
-- **Dev data.** The sentence adds ``The id is a dev id: run `ops mode` first, and when it does not show dev data, start each command with `ndv run`.`` (``The ids are dev ids`` for several).
+- **Dev data.** Each command carries the prefix `OPS_DATA_MODE=dev ndv run` (`OPS_DEV_DATA_PREFIX`), and the sentence adds ``The id is a dev id: start every ops command of the task with `OPS_DATA_MODE=dev ndv run`, run `OPS_DATA_MODE=dev ndv run ops mode --json` first, and read or write nothing when its dataMode is not dev.`` (``The ids are dev ids`` and ``these tasks`` for several). `ndv run` alone selects only the dev launcher. That launcher still follows an inherited `OPS_DATA_MODE` and the stored data mode (`apps/cli-ops/src/modes.ts`), so only the explicit variable pins dev data ((Task) 341 review).
 - **Untied.** A launch with no tied row adds nothing. Its prompt is byte for byte the prompt before (Task) 309.
 
 The workflow [[dev-wkfl-strk-ops_do]] (headless [[dev-hwkfl-strk-ops_do]]) runs beside the workflow of the mode. It finds the linked task (the clause, the `ops-task` field of a Mesh task, the operator, or the Flint place of a deliverable), reads its context, starts it when the implementation starts, and posts one place-relative update at the start, at a blocker, at a review stop, and at done. It writes only to the linked task and ends each comment with the agent signature line.
