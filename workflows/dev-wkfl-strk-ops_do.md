@@ -2,6 +2,7 @@
 description: "Work tied to an Operations task — read its context, start it, and post one place-relative update at the start, at a blocker, at a review stop, and at done, through the ops CLI"
 orbh-sessions:
   - "[[61b5f523-537e-425e-ab9a-002b3c2dac39]]"
+  - "[[f2642ffb-7c95-4231-aeac-4db9caf0b619]]"
 ---
 
 > [!important] THIS FILE IS AN INSTRUCTION. WHEN REFERENCED IT IS MEANT TO BE TAKEN AS AN ACTION.
@@ -32,7 +33,7 @@ These rules apply the Safety Rules of the Operations shard (`init-ops`, when thi
 1. **Write only to the linked task.** This workflow has three writes: `ops task start <id>`, `ops comment add <id>`, and `ops task done <id>`. Use them on the linked task only. Do not change its title, description, priority, owner, or place. Do not write to another task, a subsection, a deliverable, or a project. Do not change the Flint place of a deliverable.
 2. **Read before you write.** Run `ops task context` before the first write. Take ids from the prompt, the Mesh task, the operator, or `--json` output. Never construct or guess an id.
 3. **Post few comments.** Post one update at each meaningful point: start, blocker, review stop, and done. Do not post a comment for a progress step, a test run, or a commit. Do not post one point twice. Before you post, read the newest comments (`ops task context <id> --org <org> --comments 5`). When this session already posted that point and nothing changed, do not post again. A resumed or relaunched session does not post a second start update.
-4. **Sign each comment.** The last line of each update is the agent signature line: `_An agent wrote this comment through the ops CLI (Orbh session <session id>)._` Take the id from `$ORBH_SESSION_ID`.
+4. **Sign each comment.** The last line of each update is the agent signature line. It names the fleet and the session that wrote the comment. Run `flint orbh actor show --json` before you post. When its `ref.kind` is `fleet`, use the fleet line: `_An agent of the fleet <ref.name> (<ref.handle>) wrote this comment through the ops CLI (Orbh session <session id>)._` Else use the session line: `_An agent wrote this comment through the ops CLI (Orbh session <session id>)._` Take the session id from `$ORBH_SESSION_ID`. When `flint orbh actor show` fails, use the session line. Keep the signature line also when Operations shows the fleet as the actor of the comment ((Task) 718 of the NUU Orbh Flint): the `ops` CLI sends the fleet of each write, and Operations shows `<fleet name> · via <person>`. The signature line stays until that view is live everywhere.
 5. **Check before you repeat a write.** A network error (exit 4) can come after the service applied the write. Before you repeat a write, read the task context and look for your comment or the new status. When the write landed, do not repeat it. When you cannot tell, tell the operator. Never repeat `ops comment add` without this check.
 6. **Respect the data mode.** When the Strike clause says `data: dev`, the id is a dev id. Start every `ops` command of the task with `OPS_DATA_MODE=dev ndv run`, the reads and the writes alike. Before the first read, run `OPS_DATA_MODE=dev ndv run ops mode --json` and check that `dataMode` is `dev`. When it is not, read and write nothing, and tell the operator. Do not use `ops` alone or `ndv run ops` alone for a dev id: the `ops` on PATH can be a prod build, and the dev launcher still follows an inherited `OPS_DATA_MODE` or the stored data mode. Never send a dev id to prod data, and never post an update through a deployment that the check did not confirm.
 7. **Respect the derived state.** A task in a blocked subsection cannot go to `done` (`subsection_blocked`). Tell the operator. Do not force a status.
@@ -152,6 +153,13 @@ An update is relative to its place. It names where the work happened (this Flint
 - Verified: <the commands and their counts>
 - Open: <the open items, or none>
 
+<the signature line of Rule 4>
+```
+
+The signature line is one of these two lines (Rule 4):
+
+```markdown
+_An agent of the fleet <fleet name> (<fleet handle>) wrote this comment through the ops CLI (Orbh session <session id>)._
 _An agent wrote this comment through the ops CLI (Orbh session <session id>)._
 ```
 

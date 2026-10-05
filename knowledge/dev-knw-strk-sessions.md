@@ -12,6 +12,7 @@ orbh-sessions:
   - "[[3fb6e594-a179-4c0b-ba67-833b2ccaea67]]"
   - "[[01286b97-7ae5-4fb6-ab72-1efcbca3c525]]"
   - "[[61b5f523-537e-425e-ab9a-002b3c2dac39]]"
+  - "[[f2642ffb-7c95-4231-aeac-4db9caf0b619]]"
 ---
 
 # Knowledge: Strike Sessions
@@ -335,7 +336,7 @@ The task is tied to an Operations task: run `ops task context <opsTaskId> --org 
 - **Dev data.** Each command carries the prefix `OPS_DATA_MODE=dev ndv run` (`OPS_DEV_DATA_PREFIX`), and the sentence adds ``The id is a dev id: start every ops command of the task with `OPS_DATA_MODE=dev ndv run`, run `OPS_DATA_MODE=dev ndv run ops mode --json` first, and read or write nothing when its dataMode is not dev.`` (``The ids are dev ids`` and ``these tasks`` for several). `ndv run` alone selects only the dev launcher. That launcher still follows an inherited `OPS_DATA_MODE` and the stored data mode (`apps/cli-ops/src/modes.ts`), so only the explicit variable pins dev data ((Task) 341 review).
 - **Untied.** A launch with no tied row adds nothing. Its prompt is byte for byte the prompt before (Task) 309.
 
-The workflow [[dev-wkfl-strk-ops_do]] (headless [[dev-hwkfl-strk-ops_do]]) runs beside the workflow of the mode. It finds the linked task (the clause, the `ops-task` field of a Mesh task, the operator, or the Flint place of a deliverable), reads its context, starts it when the implementation starts, and posts one place-relative update at the start, at a blocker, at a review stop, and at done. It writes only to the linked task and ends each comment with the agent signature line.
+The workflow [[dev-wkfl-strk-ops_do]] (headless [[dev-hwkfl-strk-ops_do]]) runs beside the workflow of the mode. It finds the linked task (the clause, the `ops-task` field of a Mesh task, the operator, or the Flint place of a deliverable), reads its context, starts it when the implementation starts, and posts one place-relative update at the start, at a blocker, at a review stop, and at done. It writes only to the linked task and ends each comment with the agent signature line, which names the fleet (when `flint orbh actor show --json` names one) and the Orbh session. Operations also shows the fleet as the actor of the comment (`<fleet name> · via <person>`, (Task) 718 of the NUU Orbh Flint), because the `ops` CLI sends the fleet of each write.
 
 ### 4. The operator's extra text
 
