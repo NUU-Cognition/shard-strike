@@ -2,13 +2,16 @@
 description: "Headless Create and Do — create the task, work it to completion, and return the completion summary; review rides the returned result"
 orbh-sessions:
   - "[[61b5f523-537e-425e-ab9a-002b3c2dac39]]"
+  - "[[d98d16ae-1388-4228-8610-6954998a395a]]"
 ---
 
 > [!important] THIS FILE IS AN INSTRUCTION. WHEN REFERENCED IT IS MEANT TO BE TAKEN AS AN ACTION.
 
-Run `flint shard hstart strk` if you haven't already.
+Run `flint shard start strk` if you haven't already.
 
-# Headless Workflow: Create and Do
+# Workflow: Create and Do
+
+This workflow runs in a headless Orbh session. In an interactive session, run [[wkfl-proj-create_and_do_task]] in its place, as the Create and Do Task launch mode does ([[dev-knw-strk-sessions]]).
 
 The headless wrapper of [[wkfl-proj-create_and_do_task]]. Create the task, execute it, and deliver the completion summary as the turn result. The operator's review happens in the Strike chat, not in a terminal pane.
 
@@ -22,7 +25,7 @@ The headless wrapper of [[wkfl-proj-create_and_do_task]]. Create the task, execu
 
 ## Stage 1: Read the Preamble and Register
 
-Same as Stage 1 of [[hwkfl-strk-strike_start]]: record the ids, then register:
+Same as Stage 1 of [[wkfl-strk-strike_start]] and its `> [!headless]` callout: record the ids, then register:
 
 ```bash
 flint orbh session register "<task title>" "Headless: creating and doing the Strike task."
@@ -33,7 +36,7 @@ flint orbh session register "<task title>" "Headless: creating and doing the Str
 Run [[wkfl-proj-create_and_do_task]] Stages 1 and 2. Load `Shards/Projects/init-proj.md` first.
 
 - Record the Strike target id and the subsection id in the task's Notes
-- When the row is tied to an Operations task, follow [[dev-hwkfl-strk-ops_do]] beside this workflow: set the frontmatter fields `ops-task` and `ops-org` of the task, start the Operations task at this stage, and post one update at a blocker and at the review stop
+- When the row is tied to an Operations task, follow [[dev-wkfl-strk-ops_do]] and its `> [!headless]` callouts beside this workflow: set the frontmatter fields `ops-task` and `ops-org` of the task, start the Operations task at this stage, and post one update at a blocker and at the review stop
 - Tick checkboxes as you complete them; keep the Task Log current
 - Commit WIP by [[knw-proj-wip_commits]] when the task edits a repo
 

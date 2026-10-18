@@ -1,5 +1,5 @@
 shard-spec: "0.2.0"
-version: "0.1.1"
+version: "0.1.2"
 name: Strike
 shorthand: strk
 description: Context and workflows for Strike, the local-first target-graph terminal app that launches Orbh sessions

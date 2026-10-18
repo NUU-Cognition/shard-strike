@@ -4,6 +4,7 @@ orbh-sessions:
   - "[[acefe761-97a3-4421-86ee-08717b7cb565]]"
   - "[[3fb6e594-a179-4c0b-ba67-833b2ccaea67]]"
   - "[[61b5f523-537e-425e-ab9a-002b3c2dac39]]"
+  - "[[d98d16ae-1388-4228-8610-6954998a395a]]"
 ---
 
 > [!important] THIS FILE IS AN INSTRUCTION. WHEN REFERENCED IT IS MEANT TO BE TAKEN AS AN ACTION.
@@ -18,11 +19,17 @@ This is the first thing a Strike-launched session does. It converts one Strike r
 
 [[dev-wkfl-strk-discuss_start]] enters this workflow at Stage 2. That workflow already read the preamble and set the session keys, and it carries a discussion record into Stage 3. Skip Stage 1 when you arrive that way.
 
+> [!headless]
+> In a headless or subagent Orbh session launched from Strike, the job is the same: convert one Strike row into a scoped Mesh task with a written proposal. But the operator reads your turn results in the Strike chat instead of a terminal pane. No stage waits in the chat; every wait is a `return --await`. Follow the `> [!headless]` callout of each stage. The rules are in the section `# Headless` of [[dev-init-strk]].
+
 # Input
 
 - The composed launch prompt, already in context — it is this session's first prompt
 - (Optional) The operator's extra text at the end of that prompt
 - (Optional) Anything the operator says after launch
+
+> [!headless]
+> - Wake messages from the operator on later turns
 
 # Actions
 
@@ -64,6 +71,15 @@ Handle the two degenerate cases:
 
 Once you hold the title and the ids, progress to the next stage.
 
+> [!headless]
+> - Re-register with the headless description: `flint orbh session register "<task title>" "Headless: scoping the Strike target as a task."`
+> - **No preamble.** Do not ask in a pane. Return at once:
+>
+>   ```bash
+>   flint orbh session set strike-lifecycle input
+>   flint orbh session return --await "This session was not launched from Strike. Tell me what to work on."
+>   ```
+
 ## Stage 2: Establish Strike Context
 
 Confirm your Strike knowledge is loaded. If you have not read them, read [[dev-knw-strk-strike]] and [[dev-knw-strk-sessions]] now.
@@ -85,6 +101,10 @@ Then gather what already exists for this work:
 If an existing task already covers the row, stop and present it to the operator. Ask whether to continue that task with [[wkfl-proj-do_task]] instead of scoping a new one. Do not create a second task for the same row without the operator saying so.
 
 Once you have a picture of prior work and no duplicate blocks you, progress to the next stage.
+
+> [!headless]
+> - When the `ops task context` command fails, say so in one sentence of your next result, and continue.
+> - If an existing task covers the row, do not scope a duplicate. Set the lifecycle label to `input` and `return --await` with the existing task's name and the question: continue it, or scope a new one?
 
 ## Stage 3: Scope the Task
 
@@ -109,6 +129,19 @@ Tell the operator, in those words, to say **go** to start the next step. Name [[
 If the operator asks for changes and you stop again during the proposal conversation, set the lifecycle label to `discussing`. After a later wait in that conversation, tell the operator to say **go** again.
 
 If the operator says **go**, treat the spec as confirmed and progress to the next stage. If the operator confirms the spec without that word, progress to the next stage.
+
+> [!headless]
+> Follow the research and creation stages of [[wkfl-proj-scope_task]], but **skip every chat wait** — the proposal review happens through the returned result. When the task exists in `todo` with its proposal written:
+>
+> ```bash
+> flint orbh session set artifacts "(Task) NNN <Name>"
+> flint orbh update "Scoped (Task) NNN <Name> from the Strike target." --kind completed
+> flint orbh session register "<task title>" "Task NNN scoped; awaiting go."
+> flint orbh session set strike-lifecycle scoped
+> flint orbh session return --await "<the proposal summary>"
+> ```
+>
+> The returned result carries: the task name, the problem in two or three sentences, the proposed approach, the requirement list in short form, and the closing line: `Say go to start the work.`
 
 ## Stage 4: Hand Off
 
@@ -137,9 +170,19 @@ If the operator did not say go, stop here — the task stands on its own. Do not
 
 Inside [[wkfl-proj-do_task]], keep the label true by the mirror table in the init: set it when you stop and wait, never during the work
 
+> [!headless]
+> Stage 3 already recorded the task, re-registered the session, and set the label: do not do it again. The next wake carries the operator's reply.
+> - **go** (or a clear confirmation): run [[wkfl-proj-do_task]] on the task. When the row is tied to an Operations task, follow [[dev-wkfl-strk-ops_do]] and its `> [!headless]` callouts beside it: the go is the start of the Operations task, and the blocker and the review stop each get one update. Work until done or blocked. Then set the lifecycle label (`review` when finished, `input` when blocked) and `return --await` with the completion summary or the blocker.
+> - **Change requests**: apply them to the task, set the label to `discussing`, and `return --await` with the updated proposal.
+> - **Stop**: set the task to the state the operator names, and `return --finish` with a one-line close.
+
 # Output
 
 - A `todo` task in `Mesh/Types/Tasks/`, with a written proposal in its Notes
 - The Strike target id and the subsection id recorded in that task and on the session interface
 - Session title and description naming the Strike task
 - The operator holding a reviewed spec, told to say **go** to start the next step
+
+> [!headless]
+> - The proposal delivered as a turn result in the Strike chat
+> - The session awaiting the operator's go

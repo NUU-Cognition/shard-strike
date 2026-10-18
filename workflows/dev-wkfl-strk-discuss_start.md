@@ -2,6 +2,7 @@
 description: "Discuss a Strike-launched target with the operator in the chat, then wrap strike_start and carry the discussion into the scoped task"
 orbh-sessions:
   - "[[07edd93f-9dcc-4ad7-9b50-791dd1c33fdc]]"
+  - "[[d98d16ae-1388-4228-8610-6954998a395a]]"
 ---
 
 > [!important] THIS FILE IS AN INSTRUCTION. WHEN REFERENCED IT IS MEANT TO BE TAKEN AS AN ACTION.
@@ -16,11 +17,17 @@ This is the pre-scope sibling of [[dev-wkfl-strk-strike_start]]. That workflow s
 
 **Write nothing to the Mesh before Stage 5.** No task, no notepad, no note. The discussion lives in the chat. The scoped task is the only durable output, and the operator asks for it.
 
+> [!headless]
+> In a headless or subagent Orbh session launched from Strike, the discussion happens in the Strike chat: each of your turns returns one discussion reply and awaits, and each wake carries the operator's next message. Write no Mesh artifact until the operator agrees to scope. Follow the `> [!headless]` callout of each stage. The rules are in the section `# Headless` of [[dev-init-strk]].
+
 # Input
 
 - The composed launch prompt, already in context — it is this session's first prompt
 - (Optional) The operator's extra text at the end of that prompt
 - The operator's replies during the discussion
+
+> [!headless]
+> - The operator's replies arrive as wake messages on later turns
 
 # Actions
 
@@ -57,6 +64,13 @@ Handle the two degenerate cases:
 
 Once you hold the title and the ids, progress to the next stage.
 
+> [!headless]
+> Same as Stage 1 of [[wkfl-strk-strike_start]] and its `> [!headless]` callout: record the ids (also `strike-ops-task-id` and `strike-ops-org` for a row with an Operations clause), and return at once with no preamble. Then register:
+>
+> ```bash
+> flint orbh session register "<task title>" "Headless: discussing the Strike target before scope."
+> ```
+
 ## Stage 2: Gather Light Context
 
 Read enough to discuss well. Do not run the full research pass — that belongs to [[wkfl-proj-scope_task]] in Stage 5, and doing it twice wastes the session.
@@ -71,6 +85,9 @@ If an existing task already covers the row, say so before you discuss. Ask wheth
 Keep this stage short. One pass is enough.
 
 Once you can state the problem in your own words, progress to the next stage.
+
+> [!headless]
+> One short pass, as the normal text rules. If an existing task covers the row, say so in your first returned reply and ask whether to continue it instead.
 
 ## Stage 3: Discuss
 
@@ -100,6 +117,22 @@ This value means "no task exists yet, and we are still deciding what it should b
 
 Once the discussion settles, progress to the next stage.
 
+> [!headless]
+> Discuss through returns. Open the discussion with your first returned result. It carries:
+>
+> - What you understand the row to mean
+> - What you are unsure about
+> - The questions that change the shape of the work
+>
+> Before every await in this stage:
+>
+> ```bash
+> flint orbh session set strike-lifecycle pre-scope
+> flint orbh session return --await "<your reply>"
+> ```
+>
+> Keep a running discussion record in your context across turns: the problem in the operator's words, every option weighed, every decision, every constraint, every open question. Each wake is one operator message; answer it and await again.
+
 ## Stage 4: Offer the Handoff
 
 Do not scope on your own. The operator decides when the talk is finished.
@@ -114,6 +147,9 @@ Set the lifecycle label to `pre-scope` again and wait.
 If the operator wants to keep talking, return to Stage 3. If the operator wants to stop without a task, stop here — the discussion was the work, and no artifact is owed.
 
 Once the operator agrees to scope, progress to the next stage.
+
+> [!headless]
+> When the discussion settles, return one summary result: what you would scope, the chosen approach, the open questions, and the closing line: `Say go to scope this as a task.` Set the label to `pre-scope` and await: `flint orbh session return --await "<the summary>"`. If the operator stops without a task, `return --finish` with a one-line close — the discussion was the work.
 
 ## Stage 5: Hand Off to Strike Start
 
@@ -143,9 +179,18 @@ Write it in paragraphs, as the rest of the Notes section is written. Write it in
 
 Follow every remaining stage of [[dev-wkfl-strk-strike_start]], including the proposal review. From this point the lifecycle mirror table in the Strike init file governs the label: the first wait after scoping uses `scoped`, and a proposal conversation uses `discussing`. The `pre-scope` value belongs to this workflow only, and you do not return to it.
 
+> [!headless]
+> On the operator's go, run [[wkfl-strk-strike_start]] from its Stage 3, not from its Stage 2, and follow its `> [!headless]` callouts. Carry the discussion record into the scope, and write the **Pre-Scope Discussion** heading into the task's Notes exactly as this stage defines it. From this point that workflow owns the labels: `scoped` on the proposal await, `discussing` in the proposal conversation.
+>
+> If the operator stops without a task, `return --finish` with a one-line close — the discussion was the work.
+
 # Output
 
 - A `todo` task in `Mesh/Types/Tasks/`, scoped from a discussion instead of from a bare row title
 - A **Pre-Scope Discussion** heading in that task's Notes, holding a detailed summary of the chat
 - The Strike target id and the subsection id recorded in that task and on the session interface
 - No Mesh artifact written before the operator agreed to scope
+
+> [!headless]
+> - A discussion held in the Strike chat, one turn result per exchange
+> - On a go: a `todo` task carrying the discussion summary, scoped by Strike Start in the headless mode

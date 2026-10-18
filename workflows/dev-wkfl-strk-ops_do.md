@@ -3,6 +3,7 @@ description: "Work tied to an Operations task — read its context, start it, an
 orbh-sessions:
   - "[[61b5f523-537e-425e-ab9a-002b3c2dac39]]"
   - "[[f2642ffb-7c95-4231-aeac-4db9caf0b619]]"
+  - "[[d98d16ae-1388-4228-8610-6954998a395a]]"
 ---
 
 > [!important] THIS FILE IS AN INSTRUCTION. WHEN REFERENCED IT IS MEANT TO BE TAKEN AS AN ACTION.
@@ -21,10 +22,17 @@ The work is tied to an Operations task when one of these is true:
 
 An agent can also find the Operations work of its Flint by **place**: the deliverables whose Flint place is this Flint (Stage 1). A task found only by place is a candidate. It is not a tie until the operator confirms it.
 
+> [!headless]
+> In a headless or subagent Orbh session, this workflow runs beside the workflow of the launch mode ([[dev-wkfl-strk-strike_start]], [[dev-wkfl-strk-discuss_start]], or [[dev-wkfl-strk-create_and_do]]), in the headless mode. That workflow does the work. No operator watches a pane, so each question goes into the returned result, and a write that needs the operator's yes waits for a wake. Follow the `> [!headless]` callout of each stage.
+
 # Input
 
 - The launch prompt, the Mesh task, or the operator message that names the Operations task
 - The `ops` CLI on PATH with a signed-in credential (`ops whoami`)
+
+> [!headless]
+> - The wake message can also name the Operations task
+> - Wake messages from the operator on later turns
 
 # Rules
 
@@ -38,6 +46,11 @@ These rules apply the Safety Rules of the Operations shard (`init-ops`, when thi
 6. **Respect the data mode.** When the Strike clause says `data: dev`, the id is a dev id. Start every `ops` command of the task with `OPS_DATA_MODE=dev ndv run`, the reads and the writes alike. Before the first read, run `OPS_DATA_MODE=dev ndv run ops mode --json` and check that `dataMode` is `dev`. When it is not, read and write nothing, and tell the operator. Do not use `ops` alone or `ndv run ops` alone for a dev id: the `ops` on PATH can be a prod build, and the dev launcher still follows an inherited `OPS_DATA_MODE` or the stored data mode. Never send a dev id to prod data, and never post an update through a deployment that the check did not confirm.
 7. **Respect the derived state.** A task in a blocked subsection cannot go to `done` (`subsection_blocked`). Tell the operator. Do not force a status.
 8. **Write in Simplified Technical English.** Each update uses ASD-STE100 style: short sentences, one idea per sentence, active voice. Commands, ids, and SHAs stay exact.
+
+> [!headless]
+> Obey the eight rules above. "Tell the operator" means: say it in the returned result. Two rules are stricter here:
+> - **No write by place alone.** A task found only by the place of this Flint is a candidate. Never start it and never comment on it. Put the candidates in the result and ask the operator to name one.
+> - **No `ops task done` without an order.** Run it only when the launch prompt or a wake message tells you to close the Operations task.
 
 # Actions
 
@@ -74,6 +87,16 @@ ops-org: <Operations org>
 
 When the Mesh task does not exist yet (for example, strike_start scopes it later), add the two fields when it is created.
 
+> [!headless]
+> Use the same order: the Strike preamble, the `ops-task` field of the Mesh task, an id or URL in the operator's message, then the place of this Flint. When only the place names candidates, never start or comment on one. Return them and wait:
+>
+> ```bash
+> flint orbh session set strike-lifecycle input
+> flint orbh session return --await "<the candidates: title, place, URL; ask which task the work belongs to>"
+> ```
+>
+> Record the link on the session and in the frontmatter of the Mesh task, as above.
+
 ## Stage 2: Read the Context and the Place
 
 Read the task:
@@ -104,6 +127,9 @@ Then read the status:
 - `doing`: the task is already started (a Strike launch starts a tied row). Stage 3 posts the start update only.
 - `done`: do not reopen the task. Tell the operator that the task is done in Operations, and ask whether the work continues. Post nothing until the operator answers.
 
+> [!headless]
+> When the read fails, use the table above, and say the failure in one sentence of your next result. When the status is `done`, do not reopen the task: say so in the result, and continue only when the operator answers.
+
 ## Stage 3: Start
 
 The work starts when the implementation starts: the Mesh task goes to `in-progress`, or the session starts the work with no Mesh task. Scoping is not the start. In [[dev-wkfl-strk-strike_start]], the start is the operator's **go**.
@@ -119,12 +145,18 @@ EOF
 
 Use the update format below.
 
+> [!headless]
+> The start is the start of the implementation: in [[dev-wkfl-strk-strike_start]], the wake that says **go**; in [[dev-wkfl-strk-create_and_do]], Stage 2.
+
 ## Stage 4: Work
 
 Do the work with the workflow of the launch mode. Post no comment while you work. Post an update only at these two points:
 
 - **Blocker.** The Mesh task goes to `blocked`, or the work stops on a decision that only the operator can make. Post the blocker update. Do not change the Operations status.
 - **Review stop.** The Mesh task goes to `review`, after the WIP commits. Post the review update. Do not run `ops task done` at this point: the review comes first.
+
+> [!headless]
+> Post the blocker update when the Mesh task goes to `blocked`, before the `return --await` that names the blocker. Post the review update when the Mesh task goes to `review`, before the `return --await` with the completion summary. In that result, say that `ops task done <id>` waits for the operator.
 
 ## Stage 5: Done
 
@@ -138,6 +170,9 @@ EOF
 ```
 
 When the operator says no, or more work remains in Operations, post nothing more.
+
+> [!headless]
+> Do not ask the question and wait in a pane. When a wake message tells you to close the Operations task, run `ops task done <id> --org <org>`, then post the done update. Name the result of both commands in the returned result.
 
 ## The Update Format
 
@@ -177,3 +212,6 @@ Drop a line that has no content (for example, no commits at the start). Name a c
 - The Operations task started, with at most one update for each meaningful point
 - The link recorded on the session (`strike-ops-task-id`, `strike-ops-org`) and on the Mesh task (`ops-task`, `ops-org`)
 - No write outside the linked task
+
+> [!headless]
+> - Each Operations question and each candidate list in a returned result
