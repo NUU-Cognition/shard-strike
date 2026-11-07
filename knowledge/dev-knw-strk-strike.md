@@ -1,6 +1,7 @@
 ---
-description: "What Strike is — the two concepts, the subsection picker, the Operations page, the target model, kinds and modifiers, readiness, the Operations hierarchy, and storage"
+description: "What Strike is — the two concepts, the subsection picker, the Operations page, the target model, kinds and modifiers, readiness, the Operations hierarchy, the sibling order, and storage"
 orbh-sessions:
+  - "[[80188125-ac0b-4a4d-a942-f7f3ff1f3da4]]"
   - "[[5632c0de-bb30-49ff-975d-96d93e428d97]]"
   - "[[65228e07-2f8f-4f64-938a-5fbe4825c339]]"
   - "[[c174bf33-b199-4688-b89b-f26247582f78]]"
@@ -17,6 +18,7 @@ orbh-sessions:
   - "[[47411044-3fbf-4dcc-b869-9641652bcce7]]"
   - "[[3976181c-02d1-44ac-84a1-05a703de6355]]"
   - "[[4a3ef60d-34cb-4830-87ac-14e6ea180c45]]"
+  - "[[0bafb14a-75e0-43d1-b7af-5812739935e0]]"
   - "[[3b47c9d7-bfa1-4480-b0e4-1f8c46cf0703]]"
   - "[[42db864b-74ea-467a-9d4c-0c22ce8a176d]]"
   - "[[61b5f523-537e-425e-ab9a-002b3c2dac39]]"
@@ -477,6 +479,24 @@ Project → Deliverable → Subsection → Task
 
 The **subsection is the unit of work**. It is what a Flint binds to, and it is what a launched session is told it works under.
 
+## The Sibling Order
+
+The default tab sort orders each sibling group in `sortByStatus` (`src/command/tree-order.ts`). Every display surface reads children through `visibleChildren`, which sorts with the same function, so the plain tree, the task columns, the flat list in default sort, and the skill check tray cannot disagree.
+
+| Step | Rule |
+|------|------|
+| 1. Band | Attempts first (oldest first), then stages, then ordinary rows |
+| 2. Status | A subtree with workable doing work, then todo, then done (newest finish first) |
+| 3. Keys | Priority, due date, tie-break, then newest creation |
+| 4. Session blocks | Siblings of one bound session pull up behind the member that steps 1–3 put first ((Task) 310) |
+| 5. Overlay blocks | An Ordered Tasks group pulls up behind its first member, in rank order |
+
+**The session rule outranks steps 2 and 3 ((Task) 310).** A block sits at the slot of its first-sorted member, so a todo row of a doing row's session sits beside that doing row. The members keep their sorted order, done members included, and rows with no session keep theirs. The unit is the doing peek's rule ((Task) 198, `doingUnitsFor`): a shared session or a shared overlay group, walked to closure. The band rule outranks it: an attempt or a stage clusters only inside its band. The rule acts inside one sibling group only. Rows of one session under two parents stay under their parents; the twin letter and the twin wash link them. The root order (tree size, `compareRoots`) and the explicit list sorts (`priority`, `due`, `created`) are unchanged.
+
+**The session is a stamp, not a parameter.** The builders (`buildTreeViews`, `buildTreeViewFrom`, the inverse builders, `buildColumnViews`, and `resolveTrees`) take an optional `sessionIdOf` and stamp each node with `sessionId`. The re-sorts read the stamp. The app passes `sessionIdFor`, the selected binding of the sidecar; a closed session's bindings count too. With the Agent Sessions setting off it answers null for every row, so no node has a stamp and the order is the old one.
+
+**The nudge moves the block ((Task) 310).** `planNudge` takes the unit of each sibling (`siblingUnits`). Inside a block, `ctrl-shift-↑↓` steps the row past the next member when the two tie. At the block's edge, the whole block jumps past the neighbour's whole block when the two leaders tie. The write renumbers every row of the leader's tie key in the new display order, so no bystander changes seat. A group with no shared session nudges exactly as before.
+
 ## Cursor Movement
 
 One grammar with two axes and three modifier levels. Plain keys move one step. Shift keys make one structural jump on the same axis. Ctrl keys jump by a screen block. Arrows and `hjkl` spell the same cells. Source of truth: `src/tui/keybinds.ts` and the navigation cases of `performAction` in `src/tui/app.ts`.
@@ -583,7 +603,7 @@ Two rules keep (Task) 250's protection. The **store version guard** refuses prod
 
 The change takes effect on the NEXT start. The path constants resolve once at module load, and a live instance holds the whole graph in memory and rewrites its store on every mutation, so swapping the store under a running instance is a different and much larger change. In a dev build `ctrl-alt-r` is the restart.
 
-`LOCAL_STORE_VERSION` is **20** (`src/client/local.ts`). A newer reader migrates an older store forward once, atomically. An older binary refuses a migrated store and writes nothing, because each bump adds local truth the older engine cannot keep. Before any migrating write the engine copies the store to `<path>.pre-v20.bak`. v19 dropped what the subsection-only model could not hold: every ungrounded scope by the tree-delete rule, every target in no subsection, and any duplicate scope on one subsection. v20 adds the project backlog as a scope ((Task) 225): a scope may name a project backlog, a row may carry the `ops-backlog` mount, and a `pushBinding` may name a project instead of a subsection. A v19 engine reads none of the three — it refuses a backlog grounding outright, and it would strip an `ops-backlog` mount and a backlog binding from every row it rewrote. The engine reports the counts once, on the first start after the migration. There is no backward-compatibility code for the old model.
+`LOCAL_STORE_VERSION` is **22** (`src/client/store-version.ts`). v21 and v22 followed v20; v22 removes every stored `linked` overlay mark ((Task) 279). A newer reader migrates an older store forward once, atomically. An older binary refuses a migrated store and writes nothing, because each bump adds local truth the older engine cannot keep. Before any migrating write the engine copies the store to `<path>.pre-v22.bak`. v19 dropped what the subsection-only model could not hold: every ungrounded scope by the tree-delete rule, every target in no subsection, and any duplicate scope on one subsection. v20 adds the project backlog as a scope ((Task) 225): a scope may name a project backlog, a row may carry the `ops-backlog` mount, and a `pushBinding` may name a project instead of a subsection. A v19 engine reads none of the three — it refuses a backlog grounding outright, and it would strip an `ops-backlog` mount and a backlog binding from every row it rewrote. The engine reports the counts once, on the first start after the migration. There is no backward-compatibility code for the old model.
 
 The tabs file is at version **8** (`src/tui/tab-store.ts`). It gets no backup — it is a view, and the graph is in the store. A tab whose subsections the store no longer holds is dropped on load, and an entry the new model cannot read is dropped, never mapped. When no tab survives, the startup path above runs.
 
@@ -604,7 +624,7 @@ The per-organisation stores of the earlier layout (`strike-local.<org>.json` and
 
 ### Replication
 
-A subsection is the unit, so a subsection is the thing that replicates ((Task) 224). Every client that holds a subsection pushes its rows into the Convex table `strike_replica_targets` and subscribes to that subsection's rows. Two clients signed into the same org and holding the same subsection converge, including rows that were never pushed as Operations tasks. There is no sync gesture and no merge prompt. Source of truth: `src/ops/replica.ts` (write), `src/ops/replica-apply.ts` (read), `convex/strikeReplicas.ts` in `apps/nuu-ops` (server).
+A subsection is the unit, so a subsection is the thing that replicates ((Task) 224). Every client that holds a subsection pushes its rows into the Convex table `strike_replica_targets` and subscribes to that subsection's rows. Two clients signed into the same org and holding the same subsection converge, including rows that were never pushed as Operations tasks. There is no sync gesture and no merge prompt. Source of truth: `src/ops/replica.ts` (write), `src/ops/replica-apply.ts` (read), `convex/strikeReplicas.ts` in `apps/nuu-ops` (server). This section describes the sync protocol `replica`. An organisation with the sync protocol `commands` uses the command sync: see [[dev-knw-strk-command_sync]].
 
 **What travels.** The local truth of every row in the unit: `title`, `body`, `status`, `requires`, `scopes`, `doDate`, `dueDate`, `priority`, `rarity`, `kind`, `full`, `sideStrike`, `overlay`, `followUpOf`, `progressionOf`, `skillCheck`, `label`, `memo`, `tieBreak`, `archivedAt`, `completedAt`, the mount identity (`mountKind`, `mountId`, `mountOrg`, `mountLabel`), `pushBinding`, `createdAt`, `updatedAt`. Derived and presentation fields never travel: `readiness`, `tiePending`, `ownerUserId` and `mountMissing` are re-derived by each client. The local `_id` never travels.
 
